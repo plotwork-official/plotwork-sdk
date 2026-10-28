@@ -206,7 +206,7 @@ pnpm install
 pnpm check
 ```
 
-The diagrams in this README are Plotwork source in [`docs/diagrams/`](./docs/diagrams/), drawn by the command line. The repository follows the engineering standards in `.standards/`; see [CLAUDE.md](./CLAUDE.md).
+`pnpm shots` draws the screenshots above from the real component. The diagrams in this README are Plotwork source in [`docs/diagrams/`](./docs/diagrams/), drawn by the command line. The repository follows the engineering standards in `.standards/`; see [CLAUDE.md](./CLAUDE.md).
 
 ## Community
 

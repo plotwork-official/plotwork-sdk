@@ -21,6 +21,7 @@ The Plotwork SDK: packages that show and use Plotwork diagrams in other people's
 |---|---|
 | `pnpm check` | Type check and test every package, then the no-runtime-dependency guard. Run before you finish. |
 | `pnpm build` | Builds every package's `dist` with `tsc`. |
+| `pnpm shots` | Builds, then draws the README's screenshots of the viewer from the vanilla example in Chromium, light and dark (`scripts/shots.mjs`). Run after any change to how the viewer looks. |
 
 ## Rules that are easy to get wrong
 
