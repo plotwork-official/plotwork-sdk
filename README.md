@@ -210,7 +210,7 @@ The viewer only checks while its page is in view, never more often than every 15
 | [`@plotwork.official/viewer`](./packages/viewer/README.md) | <img alt="npm" src="https://img.shields.io/npm/v/%40plotwork.official%2Fviewer?label=&color=0f766e"> | `<plotwork-diagram>`, `<PlotworkDiagram>` for React, and the core with no element (`/core`). |
 | [`@plotwork.official/vite`](./packages/vite/README.md) | <img alt="npm" src="https://img.shields.io/npm/v/%40plotwork.official%2Fvite?label=&color=0f766e"> | `import checkout from './checkout.diagram'`: drawn at build time by the command line and redrawn on save, so no engine reaches the browser. |
 | [`@plotwork.official/sdk`](./packages/sdk/README.md) | <img alt="npm" src="https://img.shields.io/npm/v/%40plotwork.official%2Fsdk?label=&color=0f766e"> | Every `/v1` operation of the Plotwork API, typed from its OpenAPI document, on `fetch` alone. |
-| `plotwork` on PyPI | planned | The API client for Python, standard library only. |
+| [`plotwork`](https://pypi.org/org/plotwork/) on PyPI | planned | The API client for Python, standard library only. |
 
 ## Supply chain
 
