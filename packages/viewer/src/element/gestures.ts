@@ -44,7 +44,11 @@ export function attachGestures(canvas: HTMLElement, control: CanvasController): 
 
   const onDown = (event: PointerEvent): void => {
     if (event.button !== 0) return
-    canvas.setPointerCapture?.(event.pointerId)
+    try {
+      canvas.setPointerCapture?.(event.pointerId)
+    } catch {
+      // The pointer is already gone (lifted, or not a real pointer): a drag without capture still works inside the canvas.
+    }
     const point = local(event)
     pointers.set(event.pointerId, point)
     const both = pair()

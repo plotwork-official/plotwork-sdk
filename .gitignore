@@ -153,3 +153,4 @@ dist/
 dist-packs/
 .claude/state/
 .claude/settings.local.json
+docs/film/out/

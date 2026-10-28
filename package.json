@@ -13,7 +13,8 @@
     "typecheck": "pnpm -r run typecheck",
     "test": "pnpm -r run test",
     "check": "pnpm -r run typecheck && pnpm -r run test && node scripts/check-no-runtime-dependencies.mjs",
-    "shots": "pnpm build && node scripts/shots.mjs"
+    "shots": "pnpm build && node scripts/shots.mjs",
+    "film": "pnpm build && node scripts/film.mjs"
   },
   "devDependencies": {
     "@types/node": "22.20.4",

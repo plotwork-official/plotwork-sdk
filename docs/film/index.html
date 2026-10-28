@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=1280, initial-scale=1" />
+    <title>Plotwork viewer film</title>
+    <link rel="stylesheet" href="./film.css" />
+    <script type="module" src="./film.js"></script>
+  </head>
+  <body>
+    <main class="stage" aria-label="Adding the Plotwork viewer to a project">
+      <section class="code" aria-label="Editor">
+        <div class="code__tabs">
+          <span class="code__tab" data-tab="terminal">Terminal</span>
+          <span class="code__tab" data-tab="app">App.tsx</span>
+        </div>
+        <pre class="code__body" data-pane="terminal"><code id="terminal"></code></pre>
+        <pre class="code__body" data-pane="app" hidden><code id="app"></code></pre>
+      </section>
+
+      <section class="browser" aria-label="The app in a browser">
+        <div class="browser__bar">
+          <span class="browser__dots"><i></i><i></i><i></i></span>
+          <span class="browser__address">localhost:5173/architecture</span>
+        </div>
+        <div class="browser__page">
+          <h1 class="page__title">Architecture</h1>
+          <div class="page__body">
+            <plotwork-diagram id="viewer" label="Checkout flow" hidden></plotwork-diagram>
+            <aside class="drill" id="drill" hidden>
+              <p class="drill__name">Part 2: Web tier</p>
+              <code class="drill__event" id="drill-event"></code>
+            </aside>
+          </div>
+          <p class="toast" id="toast" hidden></p>
+        </div>
+      </section>
+
+      <div class="end" id="end" hidden>
+        <picture>
+          <source media="(prefers-color-scheme: dark)" srcset="https://plotwork.dev/brand/logo/plotwork-lockup-on-dark.svg" />
+          <img alt="Plotwork" src="https://plotwork.dev/brand/logo/plotwork-lockup-on-light.svg" width="300" />
+        </picture>
+        <p class="end__line">Interactive diagrams in your own app</p>
+        <code class="end__install">npm install @plotwork.official/viewer</code>
+      </div>
+
+      <svg class="pointer" id="pointer" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" hidden>
+        <path d="M5 3l14 8-6.5 1.6L9 19z" />
+      </svg>
+    </main>
+  </body>
+</html>

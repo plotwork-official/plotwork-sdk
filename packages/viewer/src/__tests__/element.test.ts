@@ -89,6 +89,15 @@ describe('<plotwork-diagram>', () => {
     expect(events['plotwork-load']).toHaveLength(1)
   })
 
+  it('treats new text set while a picture is shown as a new version, as a hot reload sends it', async () => {
+    const { element, events } = mount({}, CHECKOUT_SVG)
+    await settle()
+    element.svg = CHECKOUT_DARK_SVG
+    await settle()
+    expect(events['plotwork-load']).toHaveLength(1)
+    expect(events['plotwork-change']).toEqual([{ fingerprint: await fingerprintOf(CHECKOUT_DARK_SVG), previous: await fingerprintOf(CHECKOUT_SVG) }])
+  })
+
   it('sends a drill event for a press on a box that opens a part, and traces a box that does not', async () => {
     const { events, part } = mount({}, CHECKOUT_SVG)
     await settle()

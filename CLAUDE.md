@@ -22,6 +22,7 @@ The Plotwork SDK: packages that show and use Plotwork diagrams in other people's
 | `pnpm check` | Type check and test every package, then the no-runtime-dependency guard. Run before you finish. |
 | `pnpm build` | Builds every package's `dist` with `tsc`. |
 | `pnpm shots` | Builds, then draws the README's screenshots of the viewer from the vanilla example in Chromium, light and dark (`scripts/shots.mjs`). Run after any change to how the viewer looks. |
+| `pnpm film` | Builds, then records `docs/film/` frame by frame in light and dark into `docs/film/out/` (MP4 and the README webp). Copy them to `plotwork-assets/public/media/films/sdk/` and push that repository to publish. Needs ffmpeg. |
 
 ## Rules that are easy to get wrong
 

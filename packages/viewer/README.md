@@ -20,7 +20,7 @@
 Embed interactive Plotwork diagrams in any page: pan and zoom, trace a box's lines, drill from an overview box into its part, light and dark, and live updates when a new version is published. A web component, `<plotwork-diagram>`, and a React component, `<PlotworkDiagram>`.
 
 <p align="center">
-  <img alt="The viewer showing a checkout flow, with the Orders API box traced: its three lines and the boxes they reach are highlighted" src="https://raw.githubusercontent.com/plotwork-official/plotwork-sdk/main/docs/assets/viewer-light.png" width="760">
+  <img alt="The viewer added to an app: npm install, a PlotworkDiagram in App.tsx, then the real component tracing a box, sending a drill event, and showing a new version live" src="https://assets.plotwork.dev/media/films/sdk/readme-light.webp" width="760">
 </p>
 
 ## TL;DR
@@ -97,7 +97,7 @@ It renders as the bare element on a server and comes alive in the browser.
 | `svg` | Set the picture's text directly. |
 | `labels` | Words in your language, over the English defaults. |
 | `plotwork-load` | `{ fingerprint, hasSource }` |
-| `plotwork-change` | `{ fingerprint, previous }`: a live picture changed. |
+| `plotwork-change` | `{ fingerprint, previous }`: a new version is shown, from a live check or from `svg` set again (a hot reload). |
 | `plotwork-error` | `{ reason }`: `address`, `missing`, `not-a-picture`, `network`, `fingerprint`, or `empty`. |
 | `plotwork-drill` | `{ id, part, name }`: a box that opens a part was pressed. You decide what opens. |
 | `plotwork-trace` | `{ id }`: the traced box, or `null`. |

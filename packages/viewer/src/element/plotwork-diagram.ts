@@ -130,7 +130,7 @@ export function createPlotworkDiagramClass(): CustomElementConstructor {
 
     set svg(value: string | null) {
       this.#svg = typeof value === 'string' && value !== '' ? value : null
-      if (this.isConnected) void this.#refresh()
+      if (this.isConnected) void this.#refresh(false, this.#svg !== null)
     }
 
     get labels(): Partial<ViewerLabels> | undefined {
@@ -181,7 +181,11 @@ export function createPlotworkDiagramClass(): CustomElementConstructor {
 
     /* Loading. */
 
-    async #refresh(revalidate = false): Promise<void> {
+    /**
+     * Loads the picture again. `update` says the new text is a new version of the picture shown (a revalidation, or `svg` set while
+     * a picture is shown, as a bundler's hot reload does): it keeps the view and sends `plotwork-change` instead of `plotwork-load`.
+     */
+    async #refresh(revalidate = false, update = revalidate): Promise<void> {
       this.#loading?.abort()
       const loading = new AbortController()
       this.#loading = loading
@@ -189,7 +193,7 @@ export function createPlotworkDiagramClass(): CustomElementConstructor {
         const text = this.#svg ?? (await this.#fetch(loading.signal, revalidate))
         if (loading.signal.aborted) return
         if (text === null) return this.#fail('empty')
-        await this.#show(text, revalidate && this.#fingerprint !== null)
+        await this.#show(text, update && this.#fingerprint !== null)
       } catch (error) {
         if (!loading.signal.aborted) this.#fail(error instanceof PictureLoadError ? error.reason : 'network')
       }

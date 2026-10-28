@@ -32,14 +32,14 @@
 </p>
 
 <p align="center">
-  <a href="https://www.youtube.com/watch?v=HiuSK_mojOs">
+  <a href="https://assets.plotwork.dev/media/films/sdk/landscape-light.mp4">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://assets.plotwork.dev/media/films/hero/readme-dark.webp">
-      <img alt="The Plotwork film: an agent's request becomes an architecture diagram that stays current" src="https://assets.plotwork.dev/media/films/hero/readme-light.webp" width="820">
+      <source media="(prefers-color-scheme: dark)" srcset="https://assets.plotwork.dev/media/films/sdk/readme-dark.webp">
+      <img alt="The viewer added to an app: npm install, a PlotworkDiagram in App.tsx, then the real component tracing Orders API, sending a drill event for the Web tier, and showing version 2 live after a publish" src="https://assets.plotwork.dev/media/films/sdk/readme-light.webp" width="820">
     </picture>
   </a>
   <br>
-  <sub>Plotwork in a minute. Select the film to watch it with sound on YouTube.</sub>
+  <sub>The real component in an app, recorded by <code>pnpm film</code>. New to Plotwork? <a href="https://www.youtube.com/watch?v=HiuSK_mojOs">Watch the product film</a>.</sub>
 </p>
 
 ## TL;DR

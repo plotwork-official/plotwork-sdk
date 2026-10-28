@@ -1,0 +1,177 @@
+:root {
+  color-scheme: light dark;
+  --paper: #f4f4f1;
+  --ground: #ebeae5;
+  --card: #ffffff;
+  --ink: #171716;
+  --muted: #6b6a66;
+  --line: #dad9d2;
+  --brand: #0f766e;
+  --code-bg: #171716;
+  --code-ink: #e7e5dc;
+  --code-muted: #8f8d85;
+  --code-keyword: #c4a7e7;
+  --code-string: #9ccfd8;
+  --code-tag: #2dd4bf;
+  font-family: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #171716;
+    --ground: #101010;
+    --card: #1f1f1d;
+    --ink: #f4f4f1;
+    --muted: #a3a29b;
+    --line: #34332f;
+    --brand: #2dd4bf;
+    --code-bg: #0b0b0a;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; background: var(--ground); }
+
+.stage {
+  position: relative;
+  width: 1280px;
+  height: 720px;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 470px 1fr;
+  gap: 28px;
+  padding: 40px;
+  background:
+    radial-gradient(60% 70% at 85% 10%, color-mix(in srgb, var(--brand) 14%, transparent), transparent 70%),
+    radial-gradient(50% 60% at 5% 100%, color-mix(in srgb, var(--brand) 9%, transparent), transparent 70%),
+    var(--ground);
+}
+
+/* The editor: an ink code window, the same in both schemes, as the site's code windows are. */
+.code {
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px;
+  background: var(--code-bg);
+  box-shadow: 0 18px 50px rgb(0 0 0 / 0.22), 0 0 0 1px rgb(255 255 255 / 0.06) inset;
+  overflow: hidden;
+}
+
+.code__tabs { display: flex; gap: 4px; padding: 12px 14px 0; }
+
+.code__tab {
+  padding: 7px 14px;
+  border-radius: 8px 8px 0 0;
+  font-size: 13px;
+  color: var(--code-muted);
+}
+
+.code__tab[data-active] { background: rgb(255 255 255 / 0.07); color: var(--code-ink); }
+
+.code__body {
+  flex: 1;
+  margin: 0;
+  padding: 22px 22px;
+  background: rgb(255 255 255 / 0.03);
+  font: 15px/1.7 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  color: var(--code-ink);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.code__body[hidden] { display: none; }
+
+.t-prompt { color: var(--code-tag); }
+.t-muted { color: var(--code-muted); }
+.t-ok { color: #86efac; }
+.t-keyword { color: var(--code-keyword); }
+.t-string { color: var(--code-string); }
+.t-tag { color: var(--code-tag); }
+.caret { display: inline-block; width: 9px; height: 1.15em; margin-left: 1px; vertical-align: -0.2em; background: var(--code-tag); }
+
+/* The browser the app runs in. */
+.browser {
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow: 0 18px 50px rgb(0 0 0 / 0.14), 0 0 0 1px var(--line);
+  overflow: hidden;
+}
+
+.browser__bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.browser__dots { display: inline-flex; gap: 6px; }
+.browser__dots i { width: 11px; height: 11px; border-radius: 50%; background: var(--line); }
+
+.browser__address {
+  flex: 1;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--paper);
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.browser__page { position: relative; flex: 1; display: flex; flex-direction: column; padding: 22px 26px 26px; }
+
+.page__title { margin: 0 0 16px; font-size: 24px; font-weight: 650; color: var(--ink); letter-spacing: -0.01em; }
+
+.page__body { position: relative; flex: 1; display: flex; gap: 14px; min-height: 0; }
+
+plotwork-diagram { flex: 1; --plotwork-height: 100%; --plotwork-radius: 12px; }
+plotwork-diagram[hidden] { display: none; }
+
+.drill {
+  width: 176px;
+  padding: 18px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  transform-origin: right center;
+}
+
+.drill[hidden] { display: none; }
+.drill__name { margin: 0 0 12px; font-weight: 650; font-size: 15px; color: var(--ink); }
+.drill__event { display: block; font: 12.5px/1.6 'JetBrains Mono', ui-monospace, monospace; color: var(--brand); white-space: pre-wrap; }
+
+.toast {
+  position: absolute;
+  top: 18px;
+  right: 26px;
+  margin: 0;
+  padding: 9px 16px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 13px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.18);
+}
+
+.toast[hidden] { display: none; }
+
+/* The end card, over everything. */
+.end {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 18px;
+  background: var(--ground);
+}
+
+.end[hidden] { display: none; }
+.end__line { margin: 0; font-size: 26px; font-weight: 600; color: var(--ink); letter-spacing: -0.01em; }
+.end__install { padding: 12px 22px; border-radius: 10px; background: var(--code-bg); color: var(--code-ink); font: 17px 'JetBrains Mono', ui-monospace, monospace; }
+
+.pointer { position: absolute; left: 0; top: 0; z-index: 5; filter: drop-shadow(0 2px 3px rgb(0 0 0 / 0.35)); }
+.pointer path { fill: var(--ink); stroke: var(--card); stroke-width: 1.6; stroke-linejoin: round; }
+.pointer[hidden] { display: none; }

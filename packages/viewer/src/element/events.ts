@@ -12,7 +12,7 @@ export interface LoadDetail {
   hasSource: boolean
 }
 
-/** A live picture changed on the server, and the new version is shown. */
+/** A new version of the picture is shown: a live picture changed on the server, or `svg` was set while a picture was shown. */
 export interface ChangeDetail {
   fingerprint: string
   previous: string
