@@ -4,7 +4,7 @@ Show interactive Plotwork diagrams in your own pages: from files in your reposit
 
 [Plotwork](https://plotwork.dev) is a small text language and renderer for flow, sequence, database and cloud diagrams that AI agents and people write. Its command line, MCP server and GitHub Action draw `.diagram` files to SVG pictures; this SDK shows those pictures with every interaction the Plotwork portal has.
 
-> **Status:** `@buun_group/plotwork-viewer` is built and tested here and not yet on npm. The packages below marked planned are designed, not built.
+> **Status:** `@plotwork.official/viewer` is built and tested here and not yet on npm. The packages below marked planned are designed, not built.
 
 ## TL;DR
 
@@ -23,27 +23,27 @@ Show interactive Plotwork diagrams in your own pages: from files in your reposit
 
 | Package | Status | What it is |
 |---|---|---|
-| [`@buun_group/plotwork-viewer`](./packages/viewer/README.md) | built | `<plotwork-diagram>`, `<PlotworkDiagram>` for React, and the core with no element. |
-| `@buun_group/plotwork-vite` | planned | `import arch from './arch.diagram'`: drawn at build time by the command line, so no engine ships to the browser. |
-| `@buun_group/plotwork-sdk` | planned | A typed client for the hosted `/v1` API, on `fetch` only. |
+| [`@plotwork.official/viewer`](./packages/viewer/README.md) | built | `<plotwork-diagram>`, `<PlotworkDiagram>` for React, and the core with no element. |
+| `@plotwork.official/vite` | planned | `import arch from './arch.diagram'`: drawn at build time by the command line, so no engine ships to the browser. |
+| `@plotwork.official/sdk` | planned | A typed client for the hosted `/v1` API, on `fetch` only. |
 | `plotwork` (PyPI) | planned | The API client for Python, standard library only. |
 
 ## Show a diagram
 
 ```bash
-npm install @buun_group/plotwork-viewer
+npm install @plotwork.official/viewer
 ```
 
 ```html
 <script type="module">
-  import '@buun_group/plotwork-viewer/register'
+  import '@plotwork.official/viewer/register'
 </script>
 
 <plotwork-diagram src="/diagrams/checkout.svg" label="Checkout flow"></plotwork-diagram>
 ```
 
 ```tsx
-import { PlotworkDiagram } from '@buun_group/plotwork-viewer/react'
+import { PlotworkDiagram } from '@plotwork.official/viewer/react'
 
 <PlotworkDiagram src="https://cdn.plotwork.dev/l/<link>.svg" live onDrill={({ part }) => openPart(part)} />
 ```
@@ -64,7 +64,7 @@ import { PlotworkDiagram } from '@buun_group/plotwork-viewer/react'
 | Exact versions, frozen lockfile, no install scripts | `.npmrc`, CI |
 | New versions wait a week | `pnpm-workspace.yaml`, `renovate.json` |
 | Actions pinned to a commit | `.github/workflows/` |
-| Published from CI with npm provenance | `publishConfig.provenance` |
+| Published only from CI, by npm trusted publishing (OIDC, no token), with provenance, under `@plotwork.official` | [`.github/workflows/publish.yml`](./.github/workflows/README.md) |
 
 ## Develop
 
@@ -74,7 +74,7 @@ pnpm install
 pnpm check
 ```
 
-The repository follows the Buun Group standards in `.standards/`, with hooks that surface them to Claude Code. See [CLAUDE.md](./CLAUDE.md).
+The repository follows the engineering standards in `.standards/`, with hooks that surface them to Claude Code. See [CLAUDE.md](./CLAUDE.md).
 
 ## See also
 

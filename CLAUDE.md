@@ -11,7 +11,7 @@ The Plotwork SDK: packages that show and use Plotwork diagrams in other people's
 | Path | What it is |
 |---|---|
 | `spec/` | The picture contract every SDK reads, and fixtures the engine drew. Fixtures are drawn by the Plotwork command line, never edited by hand. |
-| `packages/viewer/` | `@buun_group/plotwork-viewer`: the `<plotwork-diagram>` web component, the React component (`/react`), and the core with no element (`/core`). |
+| `packages/viewer/` | `@plotwork.official/viewer`: the `<plotwork-diagram>` web component, the React component (`/react`), and the core with no element (`/core`). |
 | `examples/` | Pages that use the packages as a reader would. |
 | `scripts/` | Repository checks. Not shipped. |
 

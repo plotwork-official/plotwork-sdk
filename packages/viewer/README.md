@@ -1,4 +1,4 @@
-# @buun_group/plotwork-viewer
+# @plotwork.official/viewer
 
 Embed interactive Plotwork diagrams in any page: pan and zoom, trace a box's lines, drill from an overview box into its part, light and dark, and live updates when a new version is published. A web component, `<plotwork-diagram>`, and a React component, `<PlotworkDiagram>`.
 
@@ -17,14 +17,14 @@ Embed interactive Plotwork diagrams in any page: pan and zoom, trace a box's lin
 ## Install
 
 ```bash
-npm install @buun_group/plotwork-viewer
+npm install @plotwork.official/viewer
 ```
 
 ## Any page
 
 ```html
 <script type="module">
-  import '@buun_group/plotwork-viewer/register'
+  import '@plotwork.official/viewer/register'
 </script>
 
 <plotwork-diagram src="/diagrams/checkout.svg" label="Checkout flow"></plotwork-diagram>
@@ -33,7 +33,7 @@ npm install @buun_group/plotwork-viewer
 ## React
 
 ```tsx
-import { PlotworkDiagram } from '@buun_group/plotwork-viewer/react'
+import { PlotworkDiagram } from '@plotwork.official/viewer/react'
 
 export function Architecture() {
   return <PlotworkDiagram src="https://cdn.plotwork.dev/l/<link>.svg" live onDrill={({ part }) => openPart(part)} />

@@ -1,0 +1,65 @@
+name: Publish
+
+# Publishes one package to npm under @plotwork.official with trusted publishing: npm trusts this workflow in this repository through
+# GitHub's OIDC token, so no npm token exists anywhere, and every version carries a provenance statement that names this commit.
+#
+# Push a tag `<package folder>-v<version>`, such as `viewer-v0.1.0`. The version must equal the package's package.json, or nothing
+# is published. On npm, each package's trusted publisher names: organisation `plotwork-official`, repository `plotwork-sdk`,
+# workflow `publish.yml`, environment `npm`.
+
+on:
+  push:
+    tags: ['*-v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: true
+          persist-credentials: false
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - name: Read the tag
+        id: tag
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          folder="${TAG%-v*}"
+          version="${TAG##*-v}"
+          manifest="packages/$folder/package.json"
+          if [ ! -f "$manifest" ]; then echo "No package folder packages/$folder for tag $TAG" >&2; exit 1; fi
+          declared="$(node -p "require('./$manifest').version")"
+          if [ "$declared" != "$version" ]; then echo "Tag says $version, $manifest says $declared" >&2; exit 1; fi
+          echo "folder=$folder" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          case "$version" in *-*) echo "dist_tag=next" >> "$GITHUB_OUTPUT" ;; *) echo "dist_tag=latest" >> "$GITHUB_OUTPUT" ;; esac
+      - name: Install (frozen lockfile, no install scripts)
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Check
+        run: pnpm check
+        env:
+          VITEST_MAX_WORKERS: 4
+      - name: Build
+        run: pnpm --filter "./packages/${{ steps.tag.outputs.folder }}" run build
+      - name: Use an npm that publishes with OIDC
+        run: npm install --global npm@11.21.1 --ignore-scripts
+      - name: Publish with provenance
+        working-directory: packages/${{ steps.tag.outputs.folder }}
+        run: npm publish --access public --tag "${{ steps.tag.outputs.dist_tag }}"

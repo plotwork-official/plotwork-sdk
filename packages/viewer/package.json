@@ -1,5 +1,5 @@
 {
-  "name": "@buun_group/plotwork-viewer",
+  "name": "@plotwork.official/viewer",
   "version": "0.1.0",
   "description": "Embed interactive Plotwork diagrams in any page: a <plotwork-diagram> web component and a React component, with no runtime dependencies.",
   "license": "MIT",
