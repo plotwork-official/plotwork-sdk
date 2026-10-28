@@ -1,0 +1,15 @@
+sequence "How a live diagram updates" desc="A page with a live viewer revalidates the picture's address while the page is in view. An unchanged picture costs a 304 and no download; a new version is shown without a reload."
+
+actor team   person  "Your team"
+actor plot   service "Plotwork"         sub="Library and links"
+actor viewer client  "plotwork-diagram" sub="live, every 60 s"
+
+viewer -> plot : "GET picture (If-None-Match)"
+plot --> viewer : "304 Not Modified"
+note over viewer : "Nothing to download, nothing redrawn"
+
+team -> plot : "Publishes a new version"
+
+viewer -> plot : "GET picture (If-None-Match)"
+plot --> viewer : "200 with the new SVG and ETag"
+note over viewer : "New fingerprint: swaps the picture, keeps the view, fires plotwork-change"

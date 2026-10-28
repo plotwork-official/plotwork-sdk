@@ -1,6 +1,27 @@
+<p align="center">
+  <a href="https://plotwork.dev">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://plotwork.dev/brand/logo/plotwork-lockup-on-dark.svg">
+      <img alt="Plotwork" src="https://plotwork.dev/brand/logo/plotwork-lockup-on-light.svg" width="240">
+    </picture>
+  </a>
+</p>
+
 # @plotwork.official/viewer
 
+<p>
+  <a href="https://www.npmjs.com/package/@plotwork.official/viewer"><img alt="npm" src="https://img.shields.io/npm/v/%40plotwork.official%2Fviewer?logo=npm&color=0f766e"></a>
+  <img alt="Provenance" src="https://img.shields.io/badge/provenance-signed-0f766e?logo=sigstore&logoColor=white">
+  <img alt="Runtime dependencies" src="https://img.shields.io/badge/runtime%20dependencies-0-0f766e?logo=dependabot&logoColor=white">
+  <img alt="TypeScript" src="https://img.shields.io/badge/types-included-3178c6?logo=typescript&logoColor=white">
+  <a href="https://github.com/plotwork-official/plotwork-sdk/blob/main/LICENSE"><img alt="MIT licence" src="https://img.shields.io/badge/licence-MIT-52514e"></a>
+</p>
+
 Embed interactive Plotwork diagrams in any page: pan and zoom, trace a box's lines, drill from an overview box into its part, light and dark, and live updates when a new version is published. A web component, `<plotwork-diagram>`, and a React component, `<PlotworkDiagram>`.
+
+<p align="center">
+  <img alt="The viewer showing a checkout flow, with the Orders API box traced: its three lines and the boxes they reach are highlighted" src="https://raw.githubusercontent.com/plotwork-official/plotwork-sdk/main/docs/assets/viewer-light.png" width="760">
+</p>
 
 ## TL;DR
 
@@ -96,6 +117,6 @@ Set custom properties on the element: `--plotwork-height`, `--plotwork-paper`, `
 
 | Page | Why |
 |---|---|
-| [Picture contract](../../spec/picture.md) | What the viewer reads from a picture |
-| [Core](./src/core/README.md) | The parts that need no element |
-| [Element](./src/element/README.md) | How `<plotwork-diagram>` is built |
+| [Picture contract](https://github.com/plotwork-official/plotwork-sdk/blob/main/spec/picture.md) | What the viewer reads from a picture |
+| [Core](https://github.com/plotwork-official/plotwork-sdk/blob/main/packages/viewer/src/core/README.md) | The parts that need no element |
+| [Element](https://github.com/plotwork-official/plotwork-sdk/blob/main/packages/viewer/src/element/README.md) | How `<plotwork-diagram>` is built |

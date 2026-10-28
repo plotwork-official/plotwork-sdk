@@ -1,38 +1,133 @@
-# Plotwork SDK
+<p align="center">
+  <a href="https://plotwork.dev">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://plotwork.dev/brand/logo/plotwork-lockup-on-dark.svg">
+      <img alt="Plotwork" src="https://plotwork.dev/brand/logo/plotwork-lockup-on-light.svg" width="260">
+    </picture>
+  </a>
+</p>
 
-Show interactive Plotwork diagrams in your own pages: from files in your repository, from hosted links, or from your organisation's library, kept up to date when a new version is published.
+<h3 align="center">Interactive Plotwork diagrams in your own pages and apps</h3>
 
-[Plotwork](https://plotwork.dev) is a small text language and renderer for flow, sequence, database and cloud diagrams that AI agents and people write. Its command line, MCP server and GitHub Action draw `.diagram` files to SVG pictures; this SDK shows those pictures with every interaction the Plotwork portal has.
+<p align="center">
+  Pan, zoom, trace and drill into the diagrams your team and your AI agents keep in Plotwork,<br>
+  from your repository or your organisation's library, kept current when a new version is published.
+</p>
 
-> **Status:** `@plotwork.official/viewer` is built and tested here and not yet on npm. The packages below marked planned are designed, not built.
+<p align="center">
+  <a href="https://www.npmjs.com/package/@plotwork.official/viewer"><img alt="npm" src="https://img.shields.io/npm/v/%40plotwork.official%2Fviewer?logo=npm&label=%40plotwork.official%2Fviewer&color=0f766e"></a>
+  <a href="https://www.npmjs.com/package/@plotwork.official/viewer#provenance"><img alt="Provenance" src="https://img.shields.io/badge/provenance-signed-0f766e?logo=sigstore&logoColor=white"></a>
+  <a href="#supply-chain"><img alt="Runtime dependencies" src="https://img.shields.io/badge/runtime%20dependencies-0-0f766e?logo=dependabot&logoColor=white"></a>
+  <a href="https://github.com/plotwork-official/plotwork-sdk/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/plotwork-official/plotwork-sdk/ci.yml?branch=main&logo=githubactions&logoColor=white&label=CI"></a>
+  <img alt="TypeScript" src="https://img.shields.io/badge/types-included-3178c6?logo=typescript&logoColor=white">
+  <a href="./LICENSE"><img alt="MIT licence" src="https://img.shields.io/badge/licence-MIT-52514e"></a>
+</p>
+
+<p align="center">
+  <a href="https://plotwork.dev">Website</a> &nbsp;·&nbsp;
+  <a href="https://docs.plotwork.dev">Docs</a> &nbsp;·&nbsp;
+  <a href="./packages/viewer/README.md">Viewer reference</a> &nbsp;·&nbsp;
+  <a href="./spec/picture.md">Picture contract</a> &nbsp;·&nbsp;
+  <a href="./examples/vanilla/index.html">Example</a>
+</p>
+
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=HiuSK_mojOs">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://assets.plotwork.dev/media/films/hero/readme-dark.webp">
+      <img alt="The Plotwork film: an agent's request becomes an architecture diagram that stays current" src="https://assets.plotwork.dev/media/films/hero/readme-light.webp" width="820">
+    </picture>
+  </a>
+  <br>
+  <sub>Plotwork in a minute. Select the film to watch it with sound on YouTube.</sub>
+</p>
 
 ## TL;DR
 
 | Question | Answer |
 |---|---|
-| What does it show? | Any picture the Plotwork engine drew: a file in your repository, a hosted picture, a stable link, or an organisation embed link. |
-| What does the viewer do? | Pan and zoom, trace a box's lines, drill from an overview box into its part, light and dark, full screen, live updates. |
-| Which frameworks? | Any: `<plotwork-diagram>` is a web component. A React component is included. |
-| What does it install? | Nothing else. No package of the SDK has a runtime dependency, and CI fails if one appears. |
+| What is it? | `<plotwork-diagram>`, a web component, and `<PlotworkDiagram>` for React, that show any picture the Plotwork engine drew, with the interactions of the Plotwork portal. |
+| Where do pictures come from? | A file in your repository, a hosted picture, a stable link, or your organisation's library through an embed link. |
+| Does it stay current? | Add `live`: it checks for a new version every minute while the page is in view, and swaps it in without a reload. |
+| What does it install? | Nothing else. No runtime dependencies, React as an optional peer, and every release is published from CI with a signed provenance statement. |
 | Does it phone home? | No. It fetches only the address you give it, with no cookie. |
-| Does it run the diagram engine in the browser? | No. A picture already carries its boxes, lines, parts and source. |
-| Other languages? | Every package is built against [`spec/`](./spec/README.md), the same contract and fixtures in every language. |
-| Licence | MIT. |
+| Can a picture run script in my page? | No. It is shown as an image, and the element never builds markup from text. |
+| Other languages? | Every package is built against [`spec/`](./spec/README.md), one contract and one set of fixtures for every language. |
 
-## Packages
+## What it does
 
-| Package | Status | What it is |
-|---|---|---|
-| [`@plotwork.official/viewer`](./packages/viewer/README.md) | built | `<plotwork-diagram>`, `<PlotworkDiagram>` for React, and the core with no element. |
-| `@plotwork.official/vite` | planned | `import arch from './arch.diagram'`: drawn at build time by the command line, so no engine ships to the browser. |
-| `@plotwork.official/sdk` | planned | A typed client for the hosted `/v1` API, on `fetch` only. |
-| `plotwork` (PyPI) | planned | The API client for Python, standard library only. |
+<table>
+  <tr>
+    <td width="33%" valign="top">
+      <img src="https://api.iconify.design/lucide/move.svg?color=%230f766e" width="28" alt=""><br>
+      <b>Pan and zoom</b><br>
+      Drag, pinch, wheel, double press and the keys. It fits the diagram to its box and keeps it fitted as the page resizes.
+    </td>
+    <td width="33%" valign="top">
+      <img src="https://api.iconify.design/lucide/route.svg?color=%230f766e" width="28" alt=""><br>
+      <b>Trace a box's lines</b><br>
+      Hover or press a box: everything else steps back, and its lines, labels and the boxes at the other end light up.
+    </td>
+    <td width="33%" valign="top">
+      <img src="https://api.iconify.design/lucide/layers.svg?color=%230f766e" width="28" alt=""><br>
+      <b>Drill into a part</b><br>
+      A box that names a part of its series (<code>part=</code>) sends <code>plotwork-drill</code>, and your page opens the detail.
+    </td>
+  </tr>
+  <tr>
+    <td valign="top">
+      <img src="https://api.iconify.design/lucide/refresh-cw.svg?color=%230f766e" width="28" alt=""><br>
+      <b>Live updates</b><br>
+      Revalidates the address on an interval. An unchanged diagram costs a 304; a new version swaps in and keeps your view.
+    </td>
+    <td valign="top">
+      <img src="https://api.iconify.design/lucide/fingerprint.svg?color=%230f766e" width="28" alt=""><br>
+      <b>Pin a version</b><br>
+      <code>fingerprint="sha256-..."</code> shows the diagram only when it is exactly that one, like subresource integrity.
+    </td>
+    <td valign="top">
+      <img src="https://api.iconify.design/lucide/sun-moon.svg?color=%230f766e" width="28" alt=""><br>
+      <b>Light and dark</b><br>
+      Follows the page, or is forced with <code>theme</code>. Themed through <code>--plotwork-*</code> properties and <code>::part</code>.
+    </td>
+  </tr>
+  <tr>
+    <td valign="top">
+      <img src="https://api.iconify.design/lucide/shield-check.svg?color=%230f766e" width="28" alt=""><br>
+      <b>Safe by construction</b><br>
+      The picture is an image from a <code>blob:</code> address, so nothing in it runs. No cookie, no third party.
+    </td>
+    <td valign="top">
+      <img src="https://api.iconify.design/lucide/accessibility.svg?color=%230f766e" width="28" alt=""><br>
+      <b>Accessible</b><br>
+      One tab stop with a name, labelled controls, traces and updates said politely, reduced motion honoured, any language.
+    </td>
+    <td valign="top">
+      <img src="https://api.iconify.design/lucide/package-check.svg?color=%230f766e" width="28" alt=""><br>
+      <b>Zero dependencies</b><br>
+      37 kB packed, plain ES modules with types. Works with any bundler, or none.
+    </td>
+  </tr>
+</table>
 
-## Show a diagram
+## See it
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./docs/assets/viewer-dark.png">
+    <img alt="The viewer showing a checkout flow, with the Orders API box traced: its three lines and the boxes they reach are highlighted" src="./docs/assets/viewer-light.png" width="820">
+  </picture>
+  <br>
+  <sub>A checkout flow in <code>&lt;plotwork-diagram&gt;</code>, with the pointer over Orders API.</sub>
+</p>
+
+## Quick start
 
 ```bash
 npm install @plotwork.official/viewer
 ```
+
+**Any page**
 
 ```html
 <script type="module">
@@ -42,44 +137,95 @@ npm install @plotwork.official/viewer
 <plotwork-diagram src="/diagrams/checkout.svg" label="Checkout flow"></plotwork-diagram>
 ```
 
+**React**
+
 ```tsx
 import { PlotworkDiagram } from '@plotwork.official/viewer/react'
 
-<PlotworkDiagram src="https://cdn.plotwork.dev/l/<link>.svg" live onDrill={({ part }) => openPart(part)} />
+export function Architecture() {
+  return (
+    <PlotworkDiagram
+      src="https://cdn.plotwork.dev/l/<your stable link>.svg"
+      live
+      onDrill={({ part }) => openPart(part)}
+    />
+  )
+}
 ```
 
-## Keep it current
+It renders as the bare element on a server and comes alive in the browser. Every attribute, method, event and style hook is in the [viewer reference](./packages/viewer/README.md).
+
+## Where the pictures come from
+
+<p align="center">
+  <img alt="A diagram of the three sources: a .diagram file drawn by the Plotwork command line or Action into an SVG in your repository, and an organisation library published to a stable link and shared through an embed link, all shown by plotwork-diagram on your page" src="./docs/diagrams/sources.svg" width="720">
+</p>
 
 | You want | Use |
 |---|---|
-| The picture in your repository, redrawn with the code | The Plotwork GitHub Action or command line writes the SVG; point `src` at it. |
-| The latest published version, without a redeploy | A stable link (`/l/`) or an organisation embed link (`/o/`) with `live`. |
+| The diagram in your repository, redrawn with the code | The Plotwork [command line](https://docs.plotwork.dev/cli/commands) or [GitHub Action](https://docs.plotwork.dev/diagrams-in-ci) writes the SVG; point `src` at it. |
+| The latest published version, without a redeploy | A stable link (`cdn.plotwork.dev/l/...`) with `live`. |
+| A private diagram from your organisation's library | An embed link (`cdn.plotwork.dev/o/...`) the owner made for your site, with `live`. Other sites get a placeholder, and the source is never sent. |
 | Exactly one version, refused if it changes | `fingerprint="sha256-..."`. |
+
+## How live updates work
+
+<p align="center">
+  <img alt="A sequence: the viewer asks for the picture with If-None-Match and gets 304 Not Modified; your team publishes a new version; the next check gets 200 with the new SVG, and the viewer swaps it in and fires plotwork-change" src="./docs/diagrams/live-update.svg" width="640">
+</p>
+
+The viewer only checks while its page is in view, never more often than every 15 seconds, and a check that fails leaves the diagram on screen.
+
+## Packages
+
+| Package | Status | What it is |
+|---|---|---|
+| [`@plotwork.official/viewer`](./packages/viewer/README.md) | <img alt="npm" src="https://img.shields.io/npm/v/%40plotwork.official%2Fviewer?label=&color=0f766e"> | `<plotwork-diagram>`, `<PlotworkDiagram>` for React, and the core with no element (`/core`). |
+| `@plotwork.official/vite` | planned | `import arch from './arch.diagram'`, drawn at build time by the command line, so no engine reaches the browser. |
+| `@plotwork.official/sdk` | planned | A typed client for the hosted `/v1` API, on `fetch` only. |
+| `plotwork` on PyPI | planned | The API client for Python, standard library only. |
 
 ## Supply chain
 
 | Measure | Where |
 |---|---|
-| No runtime dependencies in any published package | `scripts/check-no-runtime-dependencies.mjs`, in `pnpm check` and CI |
-| Exact versions, frozen lockfile, no install scripts | `.npmrc`, CI |
-| New versions wait a week | `pnpm-workspace.yaml`, `renovate.json` |
-| Actions pinned to a commit | `.github/workflows/` |
-| Published only from CI, by npm trusted publishing (OIDC, no token), with provenance, under `@plotwork.official` | [`.github/workflows/publish.yml`](./.github/workflows/README.md) |
+| No runtime dependencies in any published package; CI fails if one appears | [`scripts/check-no-runtime-dependencies.mjs`](./scripts/check-no-runtime-dependencies.mjs) |
+| Published only from CI by npm trusted publishing (OIDC, no token), with a signed provenance statement | [`.github/workflows/publish.yml`](./.github/workflows/README.md) |
+| Exact versions, frozen lockfile, no install scripts | [`.npmrc`](./.npmrc), CI |
+| New dependency versions wait a week | [`pnpm-workspace.yaml`](./pnpm-workspace.yaml), [`renovate.json`](./renovate.json) |
+| Every action pinned to a commit | [`.github/workflows/`](./.github/workflows/) |
+
+Check a release yourself with `npm audit signatures` after installing it.
 
 ## Develop
 
 ```bash
-git clone --recurse-submodules git@github.com:plotwork-official/plotwork-sdk.git
+git clone git@github.com:plotwork-official/plotwork-sdk.git
+cd plotwork-sdk
 pnpm install
 pnpm check
 ```
 
-The repository follows the engineering standards in `.standards/`, with hooks that surface them to Claude Code. See [CLAUDE.md](./CLAUDE.md).
+The diagrams in this README are Plotwork source in [`docs/diagrams/`](./docs/diagrams/), drawn by the command line. The repository follows the engineering standards in `.standards/`; see [CLAUDE.md](./CLAUDE.md).
+
+## Community
+
+<p>
+  <a href="https://www.youtube.com/@plotwork-official"><img alt="YouTube" src="https://img.shields.io/badge/YouTube-plotwork--official-FF0000?logo=youtube&logoColor=white"></a>
+  <a href="https://www.linkedin.com/company/plotwork-dev"><img alt="LinkedIn" src="https://img.shields.io/badge/LinkedIn-plotwork--dev-0A66C2?logo=linkedin&logoColor=white"></a>
+  <a href="https://x.com/plotwork_"><img alt="X" src="https://img.shields.io/badge/X-@plotwork__-000000?logo=x&logoColor=white"></a>
+  <a href="https://bsky.app/profile/plotwork.bsky.social"><img alt="Bluesky" src="https://img.shields.io/badge/Bluesky-plotwork-0285FF?logo=bluesky&logoColor=white"></a>
+  <a href="https://mastodon.social/@plotwork"><img alt="Mastodon" src="https://img.shields.io/badge/Mastodon-@plotwork-6364FF?logo=mastodon&logoColor=white"></a>
+  <a href="https://www.instagram.com/plotwork.official"><img alt="Instagram" src="https://img.shields.io/badge/Instagram-plotwork.official-E4405F?logo=instagram&logoColor=white"></a>
+  <a href="https://discord.gg/gcAz5RJyu"><img alt="Discord" src="https://img.shields.io/badge/Discord-join-5865F2?logo=discord&logoColor=white"></a>
+</p>
 
 ## See also
 
 | Page | Why |
 |---|---|
-| [Viewer](./packages/viewer/README.md) | Attributes, events, theming, content security policy |
+| [Viewer reference](./packages/viewer/README.md) | Attributes, events, theming, content security policy |
 | [Picture contract](./spec/picture.md) | What every SDK reads from a picture |
-| [Example page](./examples/vanilla/index.html) | The viewer on a plain page |
+| [Plotwork docs](https://docs.plotwork.dev) | Writing diagrams, the command line, the MCP server, organisations |
+
+<p align="center"><sub>MIT licence. Cloud provider names and icons in diagrams are trademarks of their owners.</sub></p>

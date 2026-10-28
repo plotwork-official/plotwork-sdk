@@ -1,0 +1,25 @@
+flow "Where the viewer gets its pictures" direction=down desc="The viewer shows pictures the Plotwork engine already drew: files in your repository, and links to hosted diagrams that update when a new version is published."
+
+group repo "Your repository" {
+  node source storage "checkout.diagram" sub="Text an agent or you wrote" icon=lucide:file-code
+  node cli function "Plotwork CLI or Action" sub="Draws on every change" icon=lucide:terminal
+  node svg storage "checkout.svg" sub="Carries its source" icon=lucide:image
+}
+
+group cloud "Plotwork" {
+  node library database "Organisation library" sub="Private diagrams"
+  node stable gateway "Stable link" sub="cdn.plotwork.dev/l/" icon=lucide:link
+  node embed gateway "Embed link" sub="cdn.plotwork.dev/o/, your sites only" icon=lucide:shield-check
+}
+
+group page "Your page" {
+  node viewer client "plotwork-diagram" sub="Web component or React" icon=lucide:app-window
+}
+
+source  -> cli     : "drawn by"
+cli     -> svg     : "writes"     role=data
+svg     -> viewer  : "src or import"
+library -> stable  : "publishes"  role=async
+library -> embed   : "shares"
+stable  -> viewer  : "live"
+embed   -> viewer  : "live"
