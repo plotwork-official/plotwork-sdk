@@ -1,6 +1,6 @@
 {
   "name": "@plotwork.official/vite",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Import Plotwork .diagram files in Vite: drawn to SVG at build time by the Plotwork command line, redrawn on save, with no engine in the browser.",
   "license": "MIT",
   "type": "module",
