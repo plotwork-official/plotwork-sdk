@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "standards_root": ".standards",
+  "packs": ["testing", "vitest", "ui-craft", "monorepo", "react"],
+  "mappings": [],
+  "configs": {
+    "typecheck": { "enabled": false },
+    "lint": { "enabled": false },
+    "format": { "enabled": false },
+    "coverage": { "enabled": false },
+    "audit": { "enabled": false }
+  },
+  "enforcement": {
+    "mode": "advisory",
+    "checks": {
+      "read-tracker": { "enabled": true },
+      "doc-review-on-read": { "enabled": true },
+      "standards-gate": { "enabled": true },
+      "forbidden-patterns": {
+        "enabled": true,
+        "disable": ["no-hardcoded-jsx-text", "no-hardcoded-jsx-attr"]
+      },
+      "bash-write": { "enabled": true },
+      "session-start": { "enabled": true },
+      "references": { "enabled": true },
+      "oversized-file": { "enabled": true, "threshold": 300 },
+      "anti-slop": { "enabled": true },
+      "thin-page": { "enabled": true },
+      "folder-readme": { "enabled": true },
+      "robustness": { "enabled": true },
+      "standards-reminder": { "enabled": true },
+      "post-edit-drift": { "enabled": false }
+    }
+  }
+}

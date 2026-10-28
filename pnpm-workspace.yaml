@@ -1,0 +1,7 @@
+packages:
+  - packages/*
+
+# Supply chain: a version must be a week old before it can be installed, and no dependency runs an install script.
+minimumReleaseAge: 10080
+onlyBuiltDependencies: []
+strictDepBuilds: true

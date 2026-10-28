@@ -147,3 +147,9 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# SDK build output
+dist/
+dist-packs/
+.claude/state/
+.claude/settings.local.json

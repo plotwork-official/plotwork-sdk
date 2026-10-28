@@ -1,98 +1,85 @@
 # Plotwork SDK
 
-Embed the interactive Plotwork diagram viewer in your own pages, and script Plotwork from TypeScript.
+Show interactive Plotwork diagrams in your own pages: from files in your repository, from hosted links, or from your organisation's library, kept up to date when a new version is published.
 
-[Plotwork](https://plotwork.dev) is a small text language and renderer for flow, sequence, database and cloud diagrams that AI agents and people write. This SDK brings the viewer from the Plotwork portal to wherever your team reads: a docs site, a Backstage portal, an internal wiki or your own app.
+[Plotwork](https://plotwork.dev) is a small text language and renderer for flow, sequence, database and cloud diagrams that AI agents and people write. Its command line, MCP server and GitHub Action draw `.diagram` files to SVG pictures; this SDK shows those pictures with every interaction the Plotwork portal has.
 
-> **Status:** in design. Nothing is published to npm yet. This repository will hold the public source of the SDK packages, and its README says what they will do and how they will be set up. Watch the repository for the first release.
+> **Status:** `@buun_group/plotwork-viewer` is built and tested here and not yet on npm. The packages below marked planned are designed, not built.
 
 ## TL;DR
 
 | Question | Answer |
 |---|---|
-| What is it? | Two packages: an embeddable diagram viewer, and a typed client for the Plotwork API and engine. |
-| What does the viewer do? | Pan and zoom, tracing a box's lines, drill-down from an overview box into its part, notes, view toggles (legend, numbers, motion, dark paper), and full screen, in light and dark. |
-| Which frameworks? | Any: the viewer is a web component, `<plotwork-diagram>`. A thin React wrapper is included. |
-| Does it phone home? | No. It sends nothing by default and loads only the diagrams you point it at. |
-| Do I need an account? | Not to show a public diagram or a picture you host. A private organisation diagram needs a key or a token your page supplies. |
+| What does it show? | Any picture the Plotwork engine drew: a file in your repository, a hosted picture, a stable link, or an organisation embed link. |
+| What does the viewer do? | Pan and zoom, trace a box's lines, drill from an overview box into its part, light and dark, full screen, live updates. |
+| Which frameworks? | Any: `<plotwork-diagram>` is a web component. A React component is included. |
+| What does it install? | Nothing else. No package of the SDK has a runtime dependency, and CI fails if one appears. |
+| Does it phone home? | No. It fetches only the address you give it, with no cookie. |
+| Does it run the diagram engine in the browser? | No. A picture already carries its boxes, lines, parts and source. |
+| Other languages? | Every package is built against [`spec/`](./spec/README.md), the same contract and fixtures in every language. |
 | Licence | MIT. |
 
 ## Packages
 
-| Package | What it is |
-|---|---|
-| `@buun_group/plotwork-viewer` | The viewer as a web component (`<plotwork-diagram>`) and a React component (`<PlotworkDiagram>`). Shows a Plotwork SVG with every interaction the portal has. |
-| `@buun_group/plotwork-sdk` | A typed client for the hosted `/v1` API, and the engine's workflows (draw, validate, import a file, publish a series) as functions you can combine in your own scripts and CI. |
+| Package | Status | What it is |
+|---|---|---|
+| [`@buun_group/plotwork-viewer`](./packages/viewer/README.md) | built | `<plotwork-diagram>`, `<PlotworkDiagram>` for React, and the core with no element. |
+| `@buun_group/plotwork-vite` | planned | `import arch from './arch.diagram'`: drawn at build time by the command line, so no engine ships to the browser. |
+| `@buun_group/plotwork-sdk` | planned | A typed client for the hosted `/v1` API, on `fetch` only. |
+| `plotwork` (PyPI) | planned | The API client for Python, standard library only. |
 
-## Setting it up
-
-The setup below is the intended shape of the first release; names may still change before it ships.
-
-### Show a diagram on any page
-
-```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/@buun_group/plotwork-viewer/dist/plotwork-viewer.js"></script>
-
-<plotwork-diagram src="https://cdn.plotwork.dev/l/your-stable-link.svg" theme="auto"></plotwork-diagram>
-```
-
-`src` takes a public Plotwork link or any Plotwork SVG you host yourself. A picture that carries its source unlocks the source view, the view toggles and drill-down.
-
-### Use it in React
+## Show a diagram
 
 ```bash
 npm install @buun_group/plotwork-viewer
 ```
 
+```html
+<script type="module">
+  import '@buun_group/plotwork-viewer/register'
+</script>
+
+<plotwork-diagram src="/diagrams/checkout.svg" label="Checkout flow"></plotwork-diagram>
+```
+
 ```tsx
 import { PlotworkDiagram } from '@buun_group/plotwork-viewer/react'
 
-export function Architecture() {
-  return <PlotworkDiagram src="/diagrams/architecture.svg" theme="auto" drillDown toggles={['legend', 'numbered', 'dark']} />
-}
+<PlotworkDiagram src="https://cdn.plotwork.dev/l/<link>.svg" live onDrill={({ part }) => openPart(part)} />
 ```
 
-### Drill-down between parts
+## Keep it current
 
-A system too big for one picture is published as a series: an overview, then a part for each piece, where each overview box names its part with `part=`. Give the viewer the whole series and a press on a box opens that part beside the diagram, with a line from the box to it.
+| You want | Use |
+|---|---|
+| The picture in your repository, redrawn with the code | The Plotwork GitHub Action or command line writes the SVG; point `src` at it. |
+| The latest published version, without a redeploy | A stable link (`/l/`) or an organisation embed link (`/o/`) with `live`. |
+| Exactly one version, refused if it changes | `fingerprint="sha256-..."`. |
 
-```html
-<plotwork-diagram series="https://cdn.plotwork.dev/s/your-series.json"></plotwork-diagram>
-```
+## Supply chain
 
-### Script Plotwork
+| Measure | Where |
+|---|---|
+| No runtime dependencies in any published package | `scripts/check-no-runtime-dependencies.mjs`, in `pnpm check` and CI |
+| Exact versions, frozen lockfile, no install scripts | `.npmrc`, CI |
+| New versions wait a week | `pnpm-workspace.yaml`, `renovate.json` |
+| Actions pinned to a commit | `.github/workflows/` |
+| Published from CI with npm provenance | `publishConfig.provenance` |
+
+## Develop
 
 ```bash
-npm install @buun_group/plotwork-sdk
+git clone --recurse-submodules git@github.com:plotwork-official/plotwork-sdk.git
+pnpm install
+pnpm check
 ```
 
-```ts
-import { Plotwork } from '@buun_group/plotwork-sdk'
-
-const plotwork = new Plotwork({ apiKey: process.env.PLOTWORK_API_KEY })
-
-// Import a Terraform folder, check it, and publish every part as one series.
-const imported = await plotwork.importSource({ format: 'terraform', files })
-const series = await plotwork.publishSeries(imported, { folder: 'Platform/Azure' })
-console.log(series.overview.viewUrl)
-```
-
-Keep the key in an environment variable or your CI's secret store, never in a file you commit.
-
-## Privacy
-
-The viewer and the SDK send nothing by default: no analytics, no telemetry, no requests but the diagrams and the API calls you ask for. Diagram source is drawn in your browser or on your own machine unless you call the hosted API.
-
-## Where the source lives
-
-The SDK is built and tested in Plotwork's main repository and mirrored here on each release, the same way as the [command line](https://github.com/plotwork-official/plotwork-cli). Issues and ideas are welcome here.
+The repository follows the Buun Group standards in `.standards/`, with hooks that surface them to Claude Code. See [CLAUDE.md](./CLAUDE.md).
 
 ## See also
 
-| Link | Why |
+| Page | Why |
 |---|---|
-| [plotwork.dev](https://plotwork.dev) | What Plotwork is |
-| [Documentation](https://docs.plotwork.dev) | The diagram language, the API and the guides |
-| [plotwork-cli](https://github.com/plotwork-official/plotwork-cli) | Draw and check diagrams from a terminal or CI |
-| [plotwork-action](https://github.com/plotwork-official/plotwork-action) | Keep diagrams in step with the code in GitHub Actions |
-| [LICENSE](LICENSE) | MIT |
+| [Viewer](./packages/viewer/README.md) | Attributes, events, theming, content security policy |
+| [Picture contract](./spec/picture.md) | What every SDK reads from a picture |
+| [Example page](./examples/vanilla/index.html) | The viewer on a plain page |

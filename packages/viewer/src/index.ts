@@ -1,0 +1,7 @@
+export { definePlotworkDiagram, TAG_NAME } from './element/define.js'
+export type { PlotworkDiagramElement } from './element/plotwork-diagram.js'
+export { DEFAULT_LABELS } from './element/copy.js'
+export type { ViewerLabels } from './element/copy.js'
+export type { ChangeDetail, DrillDetail, ErrorDetail, LoadDetail, PlotworkEventMap, TraceDetail } from './element/events.js'
+export { fingerprintOf, isFingerprint, readEmbeddedSource, readTraceMap } from './core/index.js'
+export type { LoadFailure, SourceReading, ThemeChoice, TraceMap } from './core/index.js'
