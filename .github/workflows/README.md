@@ -22,5 +22,6 @@ Workflows here follow:
 |---|---|---|
 | 1 | Owner, once | In GitHub, add the environment `npm` to this repository (add required reviewers to approve each publish). |
 | 2 | Owner, once a package | On npmjs.com, in the package's settings under the `plotwork.official` organisation, add a trusted publisher: GitHub Actions, organisation `plotwork-official`, repository `plotwork-sdk`, workflow `publish.yml`, environment `npm`. If npm offers this only for a package that exists, publish the first version once by hand and set the trusted publisher straight after. |
-| 3 | Anyone with push | Set `version` in the package's `package.json`, merge, then push the tag: `git tag viewer-v0.1.0 && git push origin viewer-v0.1.0`. |
-| 4 | Owner, after the first trusted publish | In the package's settings on npm, require two-factor authentication and disallow tokens, so only this workflow can publish. |
+| 3 | Anyone with push | Set `version` in the package's `package.json`, merge, then push the tag: `git tag viewer-v0.1.0 && git push origin viewer-v0.1.0` (`vite-v...`, `sdk-v...` for the others). |
+| 4 | Owner, if asked | npm may hold a version in **Staged Packages** of the `plotwork.official` organisation until it is approved; the run succeeds, but the version is not served until then. |
+| 5 | Owner, after the first trusted publish | In the package's settings on npm, require two-factor authentication and disallow tokens, so only this workflow can publish. |

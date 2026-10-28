@@ -16,6 +16,8 @@
 
 <p align="center">
   <a href="https://www.npmjs.com/package/@plotwork.official/viewer"><img alt="npm" src="https://img.shields.io/npm/v/%40plotwork.official%2Fviewer?logo=npm&label=%40plotwork.official%2Fviewer&color=0f766e"></a>
+  <a href="https://www.npmjs.com/package/@plotwork.official/vite"><img alt="npm" src="https://img.shields.io/npm/v/%40plotwork.official%2Fvite?logo=npm&label=%40plotwork.official%2Fvite&color=0f766e"></a>
+  <a href="https://www.npmjs.com/package/@plotwork.official/sdk"><img alt="npm" src="https://img.shields.io/npm/v/%40plotwork.official%2Fsdk?logo=npm&label=%40plotwork.official%2Fsdk&color=0f766e"></a>
   <a href="https://www.npmjs.com/package/@plotwork.official/viewer#provenance"><img alt="Provenance" src="https://img.shields.io/badge/provenance-signed-0f766e?logo=sigstore&logoColor=white"></a>
   <a href="#supply-chain"><img alt="Runtime dependencies" src="https://img.shields.io/badge/runtime%20dependencies-0-0f766e?logo=dependabot&logoColor=white"></a>
   <a href="https://github.com/plotwork-official/plotwork-sdk/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/plotwork-official/plotwork-sdk/ci.yml?branch=main&logo=githubactions&logoColor=white&label=CI"></a>
@@ -27,6 +29,8 @@
   <a href="https://plotwork.dev">Website</a> &nbsp;·&nbsp;
   <a href="https://docs.plotwork.dev">Docs</a> &nbsp;·&nbsp;
   <a href="./packages/viewer/README.md">Viewer reference</a> &nbsp;·&nbsp;
+  <a href="./packages/vite/README.md">Vite plugin</a> &nbsp;·&nbsp;
+  <a href="./packages/sdk/README.md">API client</a> &nbsp;·&nbsp;
   <a href="./spec/picture.md">Picture contract</a> &nbsp;·&nbsp;
   <a href="./examples/vanilla/index.html">Example</a>
 </p>
@@ -248,6 +252,8 @@ pnpm check
 | Page | Why |
 |---|---|
 | [Viewer reference](./packages/viewer/README.md) | Attributes, events, theming, content security policy |
+| [Vite plugin](./packages/vite/README.md) | Importing `.diagram` files, options, hot reload |
+| [API client](./packages/sdk/README.md) | Every `/v1` call, errors, retries |
 | [Picture contract](./spec/picture.md) | What every SDK reads from a picture |
 | [Plotwork docs](https://docs.plotwork.dev) | Writing diagrams, the command line, the MCP server, organisations |
 
