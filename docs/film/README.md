@@ -8,7 +8,7 @@ A 20 second film of the viewer added to an app, played by the real component bui
 |---|---|
 | How is it recorded? | `pnpm film`: every frame is drawn at its time by `film.seek` and screenshot, so every run is the same. |
 | Where does it go? | `docs/film/out/` (ignored by git): `landscape-<scheme>.mp4` and `readme-<scheme>.webp`. Copy them to `plotwork-assets/public/media/films/sdk/` and push that repository; it serves them at `assets.plotwork.dev/media/films/sdk/`. |
-| Is it on YouTube? | No: the folder has no `youtube.json`. Add one there to have that repository's workflow upload it. |
+| Is it on YouTube? | Yes, https://youtu.be/zE66NDZ7xdw, uploaded by that repository's workflow from its `youtube.json`. A new cut replaces the files but is not uploaded again. |
 | Can I watch it live? | Serve the repository root and open `docs/film/index.html`; it plays in real time. |
 
 ## Contents

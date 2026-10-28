@@ -32,14 +32,14 @@
 </p>
 
 <p align="center">
-  <a href="https://assets.plotwork.dev/media/films/sdk/landscape-light.mp4">
+  <a href="https://youtu.be/zE66NDZ7xdw">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="https://assets.plotwork.dev/media/films/sdk/readme-dark.webp">
       <img alt="The viewer added to an app: npm install, a PlotworkDiagram in App.tsx, then the real component tracing Orders API, sending a drill event for the Web tier, and showing version 2 live after a publish" src="https://assets.plotwork.dev/media/films/sdk/readme-light.webp" width="820">
     </picture>
   </a>
   <br>
-  <sub>The real component in an app, recorded by <code>pnpm film</code>. New to Plotwork? <a href="https://www.youtube.com/watch?v=HiuSK_mojOs">Watch the product film</a>.</sub>
+  <sub>The real component in an app, recorded by <code>pnpm film</code>. Select it to watch on YouTube. New to Plotwork? <a href="https://www.youtube.com/watch?v=HiuSK_mojOs">Watch the product film</a>.</sub>
 </p>
 
 ## TL;DR
