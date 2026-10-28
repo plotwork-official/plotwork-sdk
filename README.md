@@ -153,7 +153,30 @@ export function Architecture() {
 }
 ```
 
-It renders as the bare element on a server and comes alive in the browser. Every attribute, method, event and style hook is in the [viewer reference](./packages/viewer/README.md).
+**A `.diagram` file in a Vite app**
+
+```ts
+// vite.config.ts
+import { plotwork } from '@plotwork.official/vite'
+export default defineConfig({ plugins: [plotwork()] })
+```
+
+```tsx
+import checkout from './diagrams/checkout.diagram'
+
+<PlotworkDiagram svg={checkout} />
+```
+
+**Script the API**
+
+```ts
+import { Plotwork } from '@plotwork.official/sdk'
+
+const plotwork = new Plotwork({ apiKey: process.env.PLOTWORK_API_KEY })
+const checked = await plotwork.diagrams.validate({ source })
+```
+
+The viewer renders as the bare element on a server and comes alive in the browser. Every attribute, method, event and style hook is in the [viewer reference](./packages/viewer/README.md).
 
 ## Where the pictures come from
 
@@ -181,8 +204,8 @@ The viewer only checks while its page is in view, never more often than every 15
 | Package | Status | What it is |
 |---|---|---|
 | [`@plotwork.official/viewer`](./packages/viewer/README.md) | <img alt="npm" src="https://img.shields.io/npm/v/%40plotwork.official%2Fviewer?label=&color=0f766e"> | `<plotwork-diagram>`, `<PlotworkDiagram>` for React, and the core with no element (`/core`). |
-| `@plotwork.official/vite` | planned | `import arch from './arch.diagram'`, drawn at build time by the command line, so no engine reaches the browser. |
-| `@plotwork.official/sdk` | planned | A typed client for the hosted `/v1` API, on `fetch` only. |
+| [`@plotwork.official/vite`](./packages/vite/README.md) | <img alt="npm" src="https://img.shields.io/npm/v/%40plotwork.official%2Fvite?label=&color=0f766e"> | `import checkout from './checkout.diagram'`: drawn at build time by the command line and redrawn on save, so no engine reaches the browser. |
+| [`@plotwork.official/sdk`](./packages/sdk/README.md) | <img alt="npm" src="https://img.shields.io/npm/v/%40plotwork.official%2Fsdk?label=&color=0f766e"> | Every `/v1` operation of the Plotwork API, typed from its OpenAPI document, on `fetch` alone. |
 | `plotwork` on PyPI | planned | The API client for Python, standard library only. |
 
 ## Supply chain

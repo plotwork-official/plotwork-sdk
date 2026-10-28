@@ -1,0 +1,53 @@
+{
+  "name": "@plotwork.official/vite",
+  "version": "0.1.0",
+  "description": "Import Plotwork .diagram files in Vite: drawn to SVG at build time by the Plotwork command line, redrawn on save, with no engine in the browser.",
+  "license": "MIT",
+  "type": "module",
+  "homepage": "https://github.com/plotwork-official/plotwork-sdk/tree/main/packages/vite",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/plotwork-official/plotwork-sdk.git",
+    "directory": "packages/vite"
+  },
+  "keywords": ["plotwork", "diagram", "vite", "vite-plugin", "svg"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./client": {
+      "types": "./client.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": ["dist", "!dist/**/__tests__", "client.d.ts", "README.md", "LICENSE"],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "@buun_group/plotwork": ">=0.8.0",
+    "vite": ">=5"
+  },
+  "peerDependenciesMeta": {
+    "@buun_group/plotwork": {
+      "optional": true
+    },
+    "vite": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "vite": "6.4.3"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}

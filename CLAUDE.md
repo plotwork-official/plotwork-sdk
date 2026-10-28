@@ -12,6 +12,8 @@ The Plotwork SDK: packages that show and use Plotwork diagrams in other people's
 |---|---|
 | `spec/` | The picture contract every SDK reads, and fixtures the engine drew. Fixtures are drawn by the Plotwork command line, never edited by hand. |
 | `packages/viewer/` | `@plotwork.official/viewer`: the `<plotwork-diagram>` web component, the React component (`/react`), and the core with no element (`/core`). |
+| `packages/vite/` | `@plotwork.official/vite`: `.diagram` imports drawn by the project's own Plotwork command line at build time. |
+| `packages/sdk/` | `@plotwork.official/sdk`: the `/v1` API client; `src/generated.ts` is written by `pnpm gen:sdk` from `spec/openapi.json`. |
 | `examples/` | Pages that use the packages as a reader would. |
 | `scripts/` | Repository checks. Not shipped. |
 
@@ -21,6 +23,8 @@ The Plotwork SDK: packages that show and use Plotwork diagrams in other people's
 |---|---|
 | `pnpm check` | Type check and test every package, then the no-runtime-dependency guard. Run before you finish. |
 | `pnpm build` | Builds every package's `dist` with `tsc`. |
+| `pnpm sync:openapi <path>` | Copies the public `/v1` operations from the app's `apps/docs/content/reference/openapi.json` into `spec/openapi.json`. Then run `pnpm gen:sdk`. |
+| `pnpm gen:sdk` | Writes `packages/sdk/src/generated.ts` from `spec/openapi.json`; `pnpm check` fails when it is stale. |
 | `pnpm shots` | Builds, then draws the README's screenshots of the viewer from the vanilla example in Chromium, light and dark (`scripts/shots.mjs`). Run after any change to how the viewer looks. |
 | `pnpm film` | Builds, then records `docs/film/` frame by frame in light and dark into `docs/film/out/` (MP4 and the README webp). Copy them to `plotwork-assets/public/media/films/sdk/` and push that repository to publish. Needs ffmpeg. |
 

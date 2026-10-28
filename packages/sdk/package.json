@@ -1,0 +1,35 @@
+{
+  "name": "@plotwork.official/sdk",
+  "version": "0.1.0",
+  "description": "The Plotwork API from TypeScript: every /v1 operation typed from the OpenAPI document, on fetch alone, with no runtime dependencies.",
+  "license": "MIT",
+  "type": "module",
+  "homepage": "https://github.com/plotwork-official/plotwork-sdk/tree/main/packages/sdk",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/plotwork-official/plotwork-sdk.git",
+    "directory": "packages/sdk"
+  },
+  "keywords": ["plotwork", "diagram", "api", "sdk", "typescript", "openapi"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": ["dist", "!dist/**/__tests__", "README.md", "LICENSE"],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}

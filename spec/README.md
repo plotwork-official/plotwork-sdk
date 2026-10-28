@@ -7,6 +7,7 @@ What every Plotwork SDK, in any language, is built against: the picture contract
 | Question | Answer |
 |---|---|
 | What is the contract? | [`picture.md`](./picture.md): the marks a viewer reads, the source, the addresses, fingerprints, live updates. |
+| What is the API? | [`openapi.json`](./openapi.json): the public `/v1` operations of the Plotwork API, copied from the API by `pnpm sync:openapi`. Each language's client is generated from it. |
 | Where are the fixtures? | `fixtures/`: a `.diagram` source and the SVGs the engine drew from it. |
 | Who draws them? | The Plotwork command line. They are never edited by hand. |
 
