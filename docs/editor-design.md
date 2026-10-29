@@ -42,13 +42,13 @@ The types are the SDK's generated `ValidateResponse` and `RenderResponse`, so a 
 | Backend | How | Key |
 |---|---|---|
 | The page's proxy (recommended) | `apiBackend({ baseUrl: '/api/plotwork' })`: the SDK client pointed at the page's own route, which adds `X-API-Key` on the server and forwards only `/v1/diagrams/validate` and `/v1/diagrams/render`. | On the page's server only. |
-| Sign in with Plotwork | `apiBackend({ token: () => session.accessToken })`: the reader signs in (OAuth 2.1 with PKCE, scope `diagrams:use`, being built in the API) and the token goes as `Authorization: Bearer`. Calls are metered to the reader. | The reader's own short-lived token. |
+| Sign in with Plotwork | `apiBackend({ token: () => session.accessToken })`: the reader signs in (OAuth 2.1 with PKCE, scope `diagrams:use`, live in the API and in `@plotwork.official/sdk/oauth`) and the token goes as `Authorization: Bearer`. Calls are metered to the reader. | The reader's own short-lived token. |
 | A self-hosted engine | `apiBackend({ baseUrl: 'https://plotwork.internal' })`: `apps/selfhost` serves the same `/v1` routes inside the company's network. | None, or the company's own gateway. |
 | A function of the page's own | Any object with `validate` and `render`, for a page that draws another way (a worker of its own, a test double). | The page's business. |
 
 The editor refuses to start with an `apiKey` option, so a key cannot be put in the browser by mistake, and its README says why. The proxy recipe ships as a ten-line handler for Next.js, a Cloudflare Worker and Express in `examples/`, each with a size cap on the body and the two routes allowed.
 
-Open dependency: the SDK client takes `apiKey`, `baseUrl` and `fetch` today. Bearer tokens need either an `accessToken` option (a function, so a refresh is the caller's) or a `fetch` wrapper; the first is cleaner and is a small change to `packages/sdk`.
+Resolved: the SDK client takes `accessToken` (a string, or a function asked before each request) beside `apiKey`, and `@plotwork.official/sdk/oauth` runs the sign-in (`createPkce`, `authorizeUrl`, `parseRedirect`, `exchangeCode`) and keeps the token fresh (`withRefresh`). `apiBackend({ token })` passes its token straight through as `accessToken`.
 
 ## The component
 
@@ -136,7 +136,7 @@ A size check in `pnpm check` holds the budget, as the no-runtime-dependency guar
 | Phase | Scope |
 |---|---|
 | 1. MVP | The `textarea` pane with line numbers and markers, debounced `validate` and `render`, the viewer for the picture, the four events, `apiBackend` with a proxy and a self-hosted engine, the React wrapper, the proxy recipes in `examples/`, tests in jsdom and a Chromium screenshot in `pnpm shots`. |
-| 2. Sign in with Plotwork | `apiBackend({ token })` once the API's OAuth is live, a `signIn()` helper that runs PKCE in a pop-up, and the SDK's `accessToken` option. |
+| 2. Sign in with Plotwork | `apiBackend({ token })` on the SDK's `accessToken` option and `/oauth` helpers (both built), and a `signIn()` helper that runs PKCE in a pop-up. |
 | 3. Richer editing | `/rich`: highlighting from a small tokenizer of the shared language (keywords, strings, arrows, comments), completion of node ids and kinds from the last valid outline, and folding. Built on the platform, still with no dependency. CodeMirror stays possible as a page's own choice through a `pane` slot. |
 | 4. Fixes and outline | `fix` buttons applied as edits with undo, and an outline panel from `/v1/diagrams/outline`. |
 

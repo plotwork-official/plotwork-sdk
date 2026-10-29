@@ -11,9 +11,9 @@ The Plotwork SDK: packages that show and use Plotwork diagrams in other people's
 | Path | What it is |
 |---|---|
 | `spec/` | The picture contract every SDK reads, and fixtures the engine drew. Fixtures are drawn by the Plotwork command line, never edited by hand. |
-| `packages/viewer/` | `@plotwork.official/viewer`: the `<plotwork-diagram>` web component, the React component (`/react`), and the core with no element (`/core`). |
+| `packages/viewer/` | `@plotwork.official/viewer`: the `<plotwork-diagram>` web component, `<plotwork-library>` (`/library`, a picker of a signed-in person's diagrams), the React components (`/react`), and the core with no element (`/core`). |
 | `packages/vite/` | `@plotwork.official/vite`: `.diagram` imports drawn by the project's own Plotwork command line at build time. |
-| `packages/sdk/` | `@plotwork.official/sdk`: the `/v1` API client; `src/generated.ts` is written by `pnpm gen:sdk` from `spec/openapi.json`. |
+| `packages/sdk/` | `@plotwork.official/sdk`: the `/v1` API client, and Sign in with Plotwork (`/oauth`); `src/generated.ts` is written by `pnpm gen:sdk` from `spec/openapi.json`. An operation that answers no JSON (`/v1/library/{id}.svg`) is skipped by the generators and written by hand in each client. |
 | `python/` | `plotwork` on PyPI: the `/v1` API client for Python, standard library only; `src/plotwork/_generated.py` is written by `pnpm gen:python` from `spec/openapi.json`. `smoke.py` runs the installed package against a real deployment. |
 | `examples/` | Apps that use the packages as a reader would: `vanilla` (a page on the built `dist`), `react-vite` and `nextjs` (installed from npm with their own lockfiles, not workspace packages; the key lives in `.env.local` and is read on a server only). CI builds each against the packed packages; `pnpm shots:examples` draws their screenshots. |
 | `scripts/` | Repository checks. Not shipped. |
@@ -38,6 +38,7 @@ The Plotwork SDK: packages that show and use Plotwork diagrams in other people's
 | A published package has no `dependencies` | Supply chain: the only code a user takes on is ours. A framework is an optional peer. The Python package keeps `dependencies = []` and imports the standard library only. `scripts/check-no-runtime-dependencies.mjs` fails otherwise. |
 | A new dev dependency needs a reason | Fewer packages, fewer ways in. Prefer `fetch`, `DOMParser`, Web Crypto and the platform. Pin exact versions; installs run no scripts (`.npmrc`). |
 | Relative imports end in `.js` | `tsc` emits them as written, and a browser or Node loads the output without a bundler. |
+| An API key never goes in a browser; a token from Sign in with Plotwork may | A key is the account's; a token is one person's, short-lived, and revocable. The viewer sends a token only to https or loopback, never with a cookie. |
 | A picture is never added to the page as markup | It is shown as an `img` from a `blob:` address, and the element builds its own nodes with `createElement`. |
 | The core stays equal to the portal's readers | `canvas-view.ts`, `picture-map.ts` and `picture-source.ts` are the portal's (`plotwork-app/apps/app/src/lib/`). Change both, or change the contract in `spec/picture.md` first. |
 | Never `cd` into `.standards/` | The hooks switch to strict mode inside it. |

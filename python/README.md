@@ -109,6 +109,8 @@ def client_for(session):
     return Plotwork(access_token=token)
 ```
 
+`session` is your server-side session store. A `TokenSet` is a dataclass: `dataclasses.asdict(tokens)` and `TokenSet(**saved)` keep it as JSON.
+
 | Helper | What it does |
 |---|---|
 | `create_pkce()` | A 64 character verifier and its S256 challenge. |

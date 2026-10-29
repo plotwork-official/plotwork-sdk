@@ -57,6 +57,7 @@
 | What does it install? | Nothing else. No runtime dependencies, React as an optional peer, and every release is published from CI with a signed provenance statement. |
 | Does it phone home? | No. It fetches only the address you give it, with no cookie. |
 | Can a picture run script in my page? | No. It is shown as an image, and the element never builds markup from text. |
+| Private diagrams in an app? | Sign in with Plotwork: your people sign in with their own Plotwork account, and `<plotwork-library>` and the viewer's `token` show their diagrams, private ones included, with no API key in the page. |
 | Other languages? | Every package is built against [`spec/`](./spec/README.md), one contract and one set of fixtures for every language. |
 
 ## What it does
@@ -110,7 +111,7 @@
     <td valign="top">
       <img src="https://api.iconify.design/lucide/package-check.svg?color=%230f766e" width="28" alt=""><br>
       <b>Zero dependencies</b><br>
-      37 kB packed, plain ES modules with types. Works with any bundler, or none.
+      54 kB packed, plain ES modules with types. Works with any bundler, or none.
     </td>
   </tr>
 </table>
@@ -190,6 +191,25 @@ plotwork = Plotwork(api_key=os.environ["PLOTWORK_API_KEY"])
 checked = plotwork.diagrams.validate(source=source)
 ```
 
+**Sign in with Plotwork**, for an app whose people have Plotwork accounts:
+
+```tsx
+import { Plotwork } from '@plotwork.official/sdk'
+import { authorizeUrl, createPkce, exchangeCode, parseRedirect, withRefresh } from '@plotwork.official/sdk/oauth'
+import { PlotworkLibrary } from '@plotwork.official/viewer/react'
+
+// Send the person to Plotwork, then trade the code they come back with for their own tokens.
+const pkce = await createPkce()
+const { url, state } = authorizeUrl({ clientId, redirectUri, scopes: ['library:read'], codeChallenge: pkce.challenge })
+const tokens = await exchangeCode({ clientId, code: parseRedirect(location.href, state), redirectUri, codeVerifier: pkce.verifier })
+const token = withRefresh(tokens, { clientId, onRefresh: save })
+
+const plotwork = new Plotwork({ accessToken: token })
+<PlotworkLibrary token={token} onSelect={({ pictureUrl }) => show(pictureUrl)} />
+```
+
+An API key stays on a server; a token from Sign in with Plotwork is the person's own and fine in a browser. The [API client](./packages/sdk/README.md#sign-in-with-plotwork) has the full server and browser examples.
+
 The viewer renders as the bare element on a server and comes alive in the browser. Every attribute, method, event and style hook is in the [viewer reference](./packages/viewer/README.md).
 
 ## Examples
@@ -248,10 +268,10 @@ The viewer only checks while its page is in view, never more often than every 15
 
 | Package | Status | What it is |
 |---|---|---|
-| [`@plotwork.official/viewer`](./packages/viewer/README.md) | <img alt="npm" src="https://img.shields.io/npm/v/%40plotwork.official%2Fviewer?label=&color=0f766e"> | `<plotwork-diagram>`, `<PlotworkDiagram>` for React, and the core with no element (`/core`). |
+| [`@plotwork.official/viewer`](./packages/viewer/README.md) | <img alt="npm" src="https://img.shields.io/npm/v/%40plotwork.official%2Fviewer?label=&color=0f766e"> | `<plotwork-diagram>`, `<PlotworkDiagram>` for React, `<plotwork-library>` (`/library`), a picker of a signed-in person's diagrams, and the core with no element (`/core`). |
 | [`@plotwork.official/vite`](./packages/vite/README.md) | <img alt="npm" src="https://img.shields.io/npm/v/%40plotwork.official%2Fvite?label=&color=0f766e"> | `import checkout from './checkout.diagram'`: drawn at build time by the command line and redrawn on save, so no engine reaches the browser. |
-| [`@plotwork.official/sdk`](./packages/sdk/README.md) | <img alt="npm" src="https://img.shields.io/npm/v/%40plotwork.official%2Fsdk?label=&color=0f766e"> | Every `/v1` operation of the Plotwork API, typed from its OpenAPI document, on `fetch` alone. |
-| [`plotwork`](./python/README.md) on PyPI | <img alt="PyPI" src="https://img.shields.io/pypi/v/plotwork?label=&color=0f766e"> | Every `/v1` operation of the Plotwork API from Python, typed from the same OpenAPI document, on the standard library alone. |
+| [`@plotwork.official/sdk`](./packages/sdk/README.md) | <img alt="npm" src="https://img.shields.io/npm/v/%40plotwork.official%2Fsdk?label=&color=0f766e"> | Every `/v1` operation of the Plotwork API, typed from its OpenAPI document, on `fetch` alone, and Sign in with Plotwork (`/oauth`). |
+| [`plotwork`](./python/README.md) on PyPI | <img alt="PyPI" src="https://img.shields.io/pypi/v/plotwork?label=&color=0f766e"> | Every `/v1` operation of the Plotwork API from Python, typed from the same OpenAPI document, on the standard library alone, and Sign in with Plotwork (`plotwork.oauth`). |
 
 ## Supply chain
 
@@ -295,7 +315,7 @@ pnpm check
 |---|---|
 | [Viewer reference](./packages/viewer/README.md) | Attributes, events, theming, content security policy |
 | [Vite plugin](./packages/vite/README.md) | Importing `.diagram` files, options, hot reload |
-| [API client](./packages/sdk/README.md) | Every `/v1` call, errors, retries |
+| [API client](./packages/sdk/README.md) | Every `/v1` call, errors, retries, Sign in with Plotwork |
 | [Python client](./python/README.md) | The same calls from Python |
 | [Examples](./examples/README.md) | Next.js, React and Vite, and a plain page |
 | [Picture contract](./spec/picture.md) | What every SDK reads from a picture |
