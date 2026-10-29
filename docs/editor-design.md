@@ -146,8 +146,8 @@ A size check in `pnpm check` holds the budget, as the no-runtime-dependency guar
 |---|---|
 | Is the editor its own package, or `@plotwork.official/viewer/editor`? | Its own package keeps the viewer small and its release apart; a subpath shares the element code and one version. |
 | Should Sign in with Plotwork calls be metered to the reader or to the page's organisation? | It decides whether a docs site can offer the editor to anonymous readers through a proxy only, or also through readers' own accounts. |
-| Which scope does `publish` need with a token? | `diagrams:use` covers drawing; publishing writes to an account and probably wants `diagrams:publish`. |
-| Will the API answer CORS for a token-bearing browser call? | Without it, Sign in with Plotwork needs a proxy anyway. |
+| Which scope does `publish` need with a token? | Answered: `diagrams:publish`. The API's Sign in with Plotwork tokens carry it as its own scope, apart from `diagrams:use`. |
+| Will the API answer CORS for a token-bearing browser call? | Answered: yes. `/v1` and the token endpoint answer any origin with no credentials, so a page can call them with a bearer token. |
 | Is a richer pane worth its size, or is CodeMirror through a slot enough? | Phase 3 is the largest piece and the one most likely to grow. |
 | Should the editor read a `.diagram` URL (`src`) as well as inline source? | It is easy, but a page that fetches a file often wants to save it back, which the editor does not do. |
 
