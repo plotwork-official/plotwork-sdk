@@ -63,7 +63,7 @@ export function SignIn() {
           </p>
         )}
         <button type="button" className="signin" onClick={() => void startSignIn()}>
-          <img src="https://plotwork.dev/brand/logo/plotwork-mark-on-light.svg" alt="" width={20} height={20} />
+          <img src="https://assets.plotwork.dev/brand/logo/plotwork-mark-on-light.svg" alt="" width={20} height={20} />
           Sign in with Plotwork
         </button>
       </>

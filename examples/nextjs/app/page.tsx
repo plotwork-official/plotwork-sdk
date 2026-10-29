@@ -71,8 +71,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<Rec
         ) : (
           <a className="signin" href="/auth/plotwork">
             <picture>
-              <source media="(prefers-color-scheme: dark)" srcSet="https://plotwork.dev/brand/logo/plotwork-mark-on-dark.svg" />
-              <img src="https://plotwork.dev/brand/logo/plotwork-mark-on-light.svg" alt="" width={20} height={20} />
+              <source media="(prefers-color-scheme: dark)" srcSet="https://assets.plotwork.dev/brand/logo/plotwork-mark-on-dark.svg" />
+              <img src="https://assets.plotwork.dev/brand/logo/plotwork-mark-on-light.svg" alt="" width={20} height={20} />
             </picture>
             Sign in with Plotwork
           </a>
