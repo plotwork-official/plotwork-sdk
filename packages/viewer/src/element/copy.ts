@@ -15,7 +15,7 @@ export interface ViewerLabels {
   traced: (name: string, lines: number) => string
   drill: (name: string) => string
   updated: string
-  failed: Readonly<Record<'address' | 'missing' | 'not-a-picture' | 'network' | 'fingerprint' | 'empty', string>>
+  failed: Readonly<Record<'address' | 'missing' | 'signed-out' | 'not-a-picture' | 'network' | 'fingerprint' | 'empty', string>>
 }
 
 export const DEFAULT_LABELS: ViewerLabels = {
@@ -34,6 +34,7 @@ export const DEFAULT_LABELS: ViewerLabels = {
   failed: {
     address: 'This diagram address cannot be shown.',
     missing: 'This diagram is not there.',
+    'signed-out': 'Sign in to see this diagram.',
     'not-a-picture': 'This is not a Plotwork diagram.',
     network: 'The diagram could not be loaded. Check the connection and the page settings.',
     fingerprint: 'This diagram has changed since the page pinned it, so it is not shown.',

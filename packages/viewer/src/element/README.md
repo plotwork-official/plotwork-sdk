@@ -14,9 +14,9 @@ Code here follows:
 
 | Path | Purpose |
 |---|---|
-| `plotwork-diagram.ts` | The element's class, made on first use (`createPlotworkDiagramClass`) so importing the package on a server is safe. Attributes, the `svg` and `labels` properties, `fit()`, `zoomIn()`, `zoomOut()`, `reload()`, `source()`, loading and pinning, live updates, and the wiring of the shell, the gestures and the events. |
+| `plotwork-diagram.ts` | The element's class, made on first use (`createPlotworkDiagramClass`) so importing the package on a server is safe. Attributes, the `svg`, `labels`, `token` and `fetch` properties, `fit()`, `zoomIn()`, `zoomOut()`, `reload()`, `source()`, loading and pinning, live updates, and the wiring of the shell, the gestures and the events. |
 | `picture-canvas.ts` | `PictureCanvas`: the view of the picture on its canvas (fit, zoom, resize), the box traced and its overlay, and what a hover or a press means (trace or drill). |
-| `loading.ts` | `fetchPictureText`, the text at `src`, and `readPicture`, its fingerprint checked against a pin and its boxes and lines read. A mistake is a `PictureLoadError`. |
+| `loading.ts` | `fetchPictureText`, the text at `src` through the page's `fetch` and with its `token`, and `readPicture`, its fingerprint checked against a pin and its boxes and lines read. A mistake is a `PictureLoadError`. |
 | `chrome.ts` | What surrounds the picture: its `img` from a `blob:` address (`PictureImage`), the paper, the canvas's name, the toolbar's words, full screen, the wheel hint. |
 | `define.ts` | `definePlotworkDiagram()`: registers the tag once, and does nothing where there is no `customElements`. |
 | `shell.ts` | The shadow tree, built once: stage, canvas, picture, toolbar, notice, wheel hint, live region. |

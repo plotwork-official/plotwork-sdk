@@ -1,3 +1,4 @@
+import type { Fetcher, TokenSource } from '../core/access.js'
 import type { WheelMode } from '../core/canvas-view.js'
 import { VIEWER_ZOOM_STEP } from '../core/limits.js'
 import { documentHost, liveIntervalOf, watchLive } from '../core/live-watch.js'
@@ -23,6 +24,13 @@ export interface PlotworkDiagramElement extends HTMLElement {
   svg: string | null
   /** Words in the page's language, over the English defaults. */
   labels: Partial<ViewerLabels> | undefined
+  /**
+   * A token from Sign in with Plotwork, or a function that gives the current one, sent as `Authorization: Bearer` with every request
+   * for `src`: what a picture of the library (`/v1/library/{id}.svg`) needs. Only to https, or http on this computer.
+   */
+  token: TokenSource | null
+  /** The `fetch` the element calls for `src` and live checks, with the same options (`cache`, `credentials: 'omit'`, the signal). */
+  fetch: Fetcher | null
   /** The fingerprint of the picture shown, or null. */
   readonly fingerprint: string | null
   /** The source the picture carries, or null when it carries none. */
@@ -52,6 +60,9 @@ export function createPlotworkDiagramClass(): CustomElementConstructor {
     #labels: ViewerLabels = mergeLabels(undefined)
     #ownLabels: Partial<ViewerLabels> | undefined
     #svg: string | null = null
+    #token: TokenSource | null = null
+    #fetcher: Fetcher | null = null
+    #failed = false
     #text: string | null = null
     #fingerprint: string | null = null
     #loading: AbortController | null = null
@@ -68,7 +79,7 @@ export function createPlotworkDiagramClass(): CustomElementConstructor {
 
     connectedCallback(): void {
       /* A property set before the element was defined sits on the instance and hides the accessor: move it onto the accessor. */
-      for (const name of ['labels', 'svg'] as const) {
+      for (const name of ['labels', 'svg', 'token', 'fetch'] as const) {
         if (!Object.hasOwn(this, name)) continue
         const value: unknown = (this as Record<string, unknown>)[name]
         delete (this as Record<string, unknown>)[name]
@@ -127,8 +138,33 @@ export function createPlotworkDiagramClass(): CustomElementConstructor {
     }
 
     set svg(value: string | null) {
-      this.#svg = typeof value === 'string' && value !== '' ? value : null
+      const next = typeof value === 'string' && value !== '' ? value : null
+      if (next === this.#svg) return
+      this.#svg = next
       if (this.isConnected) void this.#refresh(false, this.#svg !== null)
+    }
+
+    get token(): TokenSource | null {
+      return this.#token
+    }
+
+    set token(value: TokenSource | null) {
+      this.#token = typeof value === 'function' || (typeof value === 'string' && value !== '') ? value : null
+      this.#retryAfterAccess()
+    }
+
+    get fetch(): Fetcher | null {
+      return this.#fetcher
+    }
+
+    set fetch(value: Fetcher | null) {
+      this.#fetcher = typeof value === 'function' ? value : null
+      this.#retryAfterAccess()
+    }
+
+    /** A token or a `fetch` given after a load failed (a 401 before sign-in) loads again. A picture shown stays until its next check. */
+    #retryAfterAccess(): void {
+      if (this.isConnected && this.#failed && this.#svg === null) void this.#refresh()
     }
 
     get labels(): Partial<ViewerLabels> | undefined {
@@ -188,8 +224,11 @@ export function createPlotworkDiagramClass(): CustomElementConstructor {
       this.#watch()
     }
 
-    #fetch(signal: AbortSignal, revalidate: boolean): Promise<string | null> {
-      return fetchPictureText(this.getAttribute('src'), document.baseURI, signal, revalidate)
+    async #fetch(signal: AbortSignal, revalidate: boolean): Promise<string | null> {
+      // One microtask first, so a token or fetch a framework sets just after it connects the element (React's layout effects) is used.
+      await Promise.resolve()
+      if (signal.aborted) return null
+      return fetchPictureText(this.getAttribute('src'), document.baseURI, signal, revalidate, { token: this.#token, fetch: this.#fetcher })
     }
 
     /** Shows a picture's text. An update keeps the view when the picture is the same size; a first showing fits it. */
@@ -200,6 +239,7 @@ export function createPlotworkDiagramClass(): CustomElementConstructor {
       const { fingerprint } = reading
       this.#text = text
       this.#fingerprint = fingerprint
+      this.#failed = false
       this.#canvas.setPicture(reading.map, update)
       this.#paintPicture(text)
       const { picture, canvas, notice, toolbar } = this.#shell
@@ -225,6 +265,7 @@ export function createPlotworkDiagramClass(): CustomElementConstructor {
       const { picture, notice, toolbar, canvas } = this.#shell
       this.#text = null
       this.#fingerprint = null
+      this.#failed = true
       this.#canvas.clear()
       picture.hidden = true
       this.#image.clear()

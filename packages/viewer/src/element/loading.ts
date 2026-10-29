@@ -1,3 +1,5 @@
+import { bearerHeaders, mayCarryToken } from '../core/access.js'
+import type { Fetcher, TokenSource } from '../core/access.js'
 import { fingerprintOf, isFingerprint } from '../core/fingerprint.js'
 import { parsePicture, traceMapOf } from '../core/picture-map.js'
 import type { TraceMap } from '../core/picture-map.js'
@@ -8,12 +10,28 @@ import { loadPicture, pictureUrl, PictureLoadError } from '../core/picture-loade
  * turns into its notice and `plotwork-error`.
  */
 
-/** The text at `src`, resolved against the page; null when there is no `src`. */
-export async function fetchPictureText(src: string | null, base: string, signal: AbortSignal, revalidate: boolean): Promise<string | null> {
+/** How the element asks: the page's `fetch` and token, when it set them. */
+export interface Access {
+  fetch?: Fetcher | null | undefined
+  token?: TokenSource | null | undefined
+}
+
+/**
+ * The text at `src`, resolved against the page; null when there is no `src`. With a token, the address must be https (or http on
+ * this computer), or it is refused as `address`; a token function that throws is `signed-out`.
+ */
+export async function fetchPictureText(src: string | null, base: string, signal: AbortSignal, revalidate: boolean, access: Access = {}): Promise<string | null> {
   if (src === null || src.trim() === '') return null
   const url = pictureUrl(src, base)
   if (url === null) throw new PictureLoadError('address')
-  return loadPicture(url, { signal, revalidate })
+  let headers: Record<string, string>
+  try {
+    headers = await bearerHeaders(access.token)
+  } catch {
+    throw new PictureLoadError('signed-out')
+  }
+  if (headers.Authorization !== undefined && !mayCarryToken(url)) throw new PictureLoadError('address')
+  return loadPicture(url, { signal, revalidate, headers, fetcher: access.fetch ?? undefined })
 }
 
 /** A picture read for showing. */

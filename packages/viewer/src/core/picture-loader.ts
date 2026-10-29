@@ -1,3 +1,4 @@
+import type { Fetcher } from './access.js'
 import { PICTURE_MAX_BYTES, REQUEST_TIMEOUT_MS } from './limits.js'
 
 /**
@@ -5,6 +6,9 @@ import { PICTURE_MAX_BYTES, REQUEST_TIMEOUT_MS } from './limits.js'
  * (`/l/...`), or an organisation's embed link (`/o/...`). It sends no cookie, asks for an image, and refuses a response past
  * `PICTURE_MAX_BYTES` before reading it whole. A failure is a `PictureLoadError` with a reason the element shows, never a
  * stack trace.
+ *
+ * A picture of a signed-in person's library (`/v1/library/{id}.svg`) also needs `Authorization: Bearer`, passed in `headers`; the
+ * token is the person's own, and it is the only credential ever sent.
  *
  * `revalidate` asks the browser to check its copy with the server before using it (`cache: 'no-cache'`): the browser sends the tag it
  * holds, the server answers 304 when nothing changed, and the browser hands back its copy. That is how a live viewer sees a new
@@ -17,6 +21,8 @@ export type LoadFailure =
   | 'address'
   /** The server answered 404 or 403. */
   | 'missing'
+  /** The server answered 401: the address needs a token (a picture of the library), or the token was refused or ran out. */
+  | 'signed-out'
   /** The answer is not an SVG, or is larger than any picture. */
   | 'not-a-picture'
   /** No answer: offline, refused by the page's content security policy or CORS, or timed out. */
@@ -52,7 +58,9 @@ export interface LoadOptions {
   /** Check the browser's copy with the server first, for a live viewer. */
   revalidate?: boolean | undefined
   /** The `fetch` to call; the global one when left out, so a test or a host can supply its own. */
-  fetcher?: typeof fetch | undefined
+  fetcher?: Fetcher | undefined
+  /** Headers besides `Accept`, such as `Authorization` for a picture of the library. */
+  headers?: Readonly<Record<string, string>> | undefined
 }
 
 /** The text of the picture at an address. */
@@ -61,14 +69,15 @@ export async function loadPicture(url: URL, options: LoadOptions = {}): Promise<
   const timer = setTimeout(() => timeout.abort(), REQUEST_TIMEOUT_MS)
   const abort = (): void => timeout.abort()
   options.signal?.addEventListener('abort', abort, { once: true })
-  const fetcher = options.fetcher ?? fetch
+  const fetcher: Fetcher = options.fetcher ?? ((input, init) => fetch(input, init))
   try {
     const response = await fetcher(url.href, {
       credentials: 'omit',
-      headers: { Accept: 'image/svg+xml' },
+      headers: { ...options.headers, Accept: 'image/svg+xml' },
       cache: options.revalidate === true ? 'no-cache' : 'default',
       signal: timeout.signal,
     })
+    if (response.status === 401) throw new PictureLoadError('signed-out')
     if (response.status === 404 || response.status === 403) throw new PictureLoadError('missing')
     if (!response.ok) throw new PictureLoadError('network')
     const declared = Number(response.headers.get('content-length'))

@@ -5,11 +5,12 @@ import { definePlotworkDiagram, TAG_NAME } from '../element/define.js'
 import type { ViewerLabels } from '../element/copy.js'
 import type { ChangeDetail, DrillDetail, ErrorDetail, LoadDetail, TraceDetail } from '../element/events.js'
 import type { PlotworkDiagramElement } from '../element/plotwork-diagram.js'
+import type { Fetcher, TokenSource } from '../core/access.js'
 import type { ThemeChoice } from '../core/picture-scheme.js'
 
 /**
  * `<PlotworkDiagram>`: the `<plotwork-diagram>` element for React. It registers the element on first render, passes plain values as
- * attributes, sets `svg` and `labels` as properties, and turns the element's events into callbacks. React is a peer dependency;
+ * attributes, sets `svg`, `labels`, `token` and `fetch` as properties, and turns the element's events into callbacks. React is a peer dependency;
  * nothing else is imported. The ref is the element itself, with `fit()`, `zoomIn()`, `zoomOut()`, `reload()` and `source()`.
  */
 export interface PlotworkDiagramProps {
@@ -31,6 +32,13 @@ export interface PlotworkDiagramProps {
   /** What the diagram shows, for a screen reader. */
   label?: string | undefined
   labels?: Partial<ViewerLabels> | undefined
+  /**
+   * A token from Sign in with Plotwork, or a function that gives the current one, for a picture of the person's library
+   * (`/v1/library/{id}.svg`). Embed links and stable links need none.
+   */
+  token?: TokenSource | null | undefined
+  /** The `fetch` the element calls for `src` and live checks. */
+  fetch?: Fetcher | null | undefined
   className?: string | undefined
   style?: CSSProperties | undefined
   onLoad?: ((detail: LoadDetail) => void) | undefined
@@ -71,6 +79,14 @@ function PlotworkDiagramInner(props: PlotworkDiagramProps, ref: Ref<PlotworkDiag
       for (const remove of listeners) remove()
     }
   }, [])
+
+  // Before the picture: a token set here is read by the element's first request. A new function each render costs no request.
+  useClientLayoutEffect(() => {
+    const node = element.current
+    if (node === null) return
+    node.token = props.token ?? null
+    node.fetch = props.fetch ?? null
+  }, [props.token, props.fetch])
 
   useClientLayoutEffect(() => {
     const node = element.current

@@ -38,6 +38,24 @@ describe('fetchPictureText', () => {
     expect(await fetchPictureText('  ', 'https://example.com/', signal, false)).toBeNull()
   })
 
+  it('sends a bearer only to https or this computer, and calls a token function that throws signed out', async () => {
+    const seen: RequestInit[] = []
+    const fetcher = async (_url: string, init: RequestInit): Promise<Response> => {
+      seen.push(init)
+      return new Response(CHECKOUT_SVG)
+    }
+    const signal = new AbortController().signal
+    expect(await fetchPictureText('http://localhost:8787/v1/library/a.svg', 'https://example.com/', signal, false, { fetch: fetcher, token: 'pwa_1' })).toBe(CHECKOUT_SVG)
+    expect(seen[0]?.headers).toMatchObject({ Authorization: 'Bearer pwa_1' })
+    await expect(fetchPictureText('http://example.org/a.svg', 'https://example.com/', signal, false, { fetch: fetcher, token: 'pwa_1' })).rejects.toMatchObject({ reason: 'address' })
+    const failing = (): string => {
+      throw new Error('signed out')
+    }
+    await expect(fetchPictureText('https://api.plotwork.dev/v1/library/a.svg', 'https://example.com/', signal, false, { fetch: fetcher, token: failing })).rejects.toMatchObject({ reason: 'signed-out' })
+    expect(await fetchPictureText('http://example.org/a.svg', 'https://example.com/', signal, false, { fetch: fetcher, token: '' })).toBe(CHECKOUT_SVG)
+    expect(seen.at(-1)?.headers).not.toHaveProperty('Authorization')
+  })
+
   it('refuses an address it will not fetch', async () => {
     await expect(fetchPictureText('javascript:alert(1)', 'https://example.com/', new AbortController().signal, false)).rejects.toMatchObject({ reason: 'address' })
   })

@@ -19,7 +19,8 @@ Code here follows:
 | `picture-source.ts` | The source a picture carries in its `<metadata data-format="buun-diagram">` (`readEmbeddedSource`). |
 | `picture-scheme.ts` | The `theme` choice, and `withScheme`, which sets `data-scheme` on an `auto` picture's root to force light or dark. |
 | `fingerprint.ts` | `sha256-<hex>` of a picture's text: what `fingerprint` pins and what an organisation embed link sends as its `ETag`. |
-| `picture-loader.ts` | Fetching a picture by address with no cookie, a size cap and a timeout, and revalidating it for a live viewer. |
+| `picture-loader.ts` | Fetching a picture by address with no cookie, a size cap and a timeout, and revalidating it for a live viewer. A 401 is `signed-out`. |
+| `access.ts` | A token from Sign in with Plotwork as `Authorization: Bearer`, and `mayCarryToken`: https, or http on this computer, only. |
 | `live-watch.ts` | Checking a live picture for a new version on an interval, only while the page is in view. |
 | `limits.ts` | The numbers: zoom range and steps, padding, size cap, timeout, live interval. |
 | `index.ts` | The barrel. |

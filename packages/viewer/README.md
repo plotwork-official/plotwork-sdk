@@ -31,6 +31,7 @@ Embed interactive Plotwork diagrams in any page: pan and zoom, trace a box's lin
 | What does it install? | Nothing else. No runtime dependencies; React is an optional peer for the React component. |
 | Does it run the diagram engine? | No. A Plotwork picture already carries its boxes, lines, parts and source, so the viewer reads them. |
 | Does it phone home? | No. It fetches only the address you give it, with no cookie. |
+| Private pictures? | A picture of a signed-in person's library needs their token from Sign in with Plotwork: set `token`. Embed links and stable links need none. |
 | Can a picture run script in my page? | No. It is shown as an `img`, and the element builds its own nodes without HTML text. |
 | Live updates? | `live` checks the address every 60 seconds while the page is in view and swaps in a new version. |
 | Pinning? | `fingerprint="sha256-..."` shows the picture only when it is exactly that one. |
@@ -71,6 +72,7 @@ It renders as the bare element on a server and comes alive in the browser.
 | A hosted picture | `https://cdn.plotwork.dev/d/<token>.svg` | Never changes. |
 | A stable link | `https://cdn.plotwork.dev/l/<token>.svg` | Always the latest version of a named diagram. Add `live` to follow it. |
 | An organisation's library | `https://cdn.plotwork.dev/o/<token>.svg` | An embed link the owner made for your site. Other sites get a placeholder. The source is never sent. |
+| A signed-in person's library | `https://api.plotwork.dev/v1/library/<id>.svg` | Needs `token`, from [Sign in with Plotwork](#private-pictures) with `library:read`. Private pictures included. |
 | Text you already hold | the `svg` property | A bundler import, or a picture your server fetched. Wins over `src`. |
 
 ## Attributes
@@ -96,11 +98,41 @@ It renders as the bare element on a server and comes alive in the browser.
 | `fingerprint` | The fingerprint of the picture shown. |
 | `svg` | Set the picture's text directly. |
 | `labels` | Words in your language, over the English defaults. |
+| `token` | A token from Sign in with Plotwork, or a function that returns the current one, sent as `Authorization: Bearer` with each request for `src`. Only to https, or http on `localhost`. |
+| `fetch` | A `fetch`-like function the element calls for `src` and live checks, with its own options (`cache`, `credentials: 'omit'`). |
 | `plotwork-load` | `{ fingerprint, hasSource }` |
 | `plotwork-change` | `{ fingerprint, previous }`: a new version is shown, from a live check or from `svg` set again (a hot reload). |
-| `plotwork-error` | `{ reason }`: `address`, `missing`, `not-a-picture`, `network`, `fingerprint`, or `empty`. |
+| `plotwork-error` | `{ reason }`: `address`, `missing`, `signed-out` (a 401: no token, or one that ran out), `not-a-picture`, `network`, `fingerprint`, or `empty`. |
 | `plotwork-drill` | `{ id, part, name }`: a box that opens a part was pressed. You decide what opens. |
 | `plotwork-trace` | `{ id }`: the traced box, or `null`. |
+
+## Private pictures
+
+An app whose people sign in with Plotwork ([`@plotwork.official/sdk/oauth`](https://www.npmjs.com/package/@plotwork.official/sdk#sign-in-with-plotwork)) shows any diagram of their library, private ones included, from `/v1/library/<id>.svg` with their token. A function is asked before each request, so a live picture keeps working across a refresh.
+
+```tsx
+import { Plotwork } from '@plotwork.official/sdk'
+import { withRefresh } from '@plotwork.official/sdk/oauth'
+import { PlotworkDiagram } from '@plotwork.official/viewer/react'
+
+const token = withRefresh(tokens, { clientId, onRefresh: save })
+const plotwork = new Plotwork({ accessToken: token })
+
+<PlotworkDiagram src={plotwork.library.pictureUrl(id)} token={token} live />
+```
+
+```js
+const diagram = document.querySelector('plotwork-diagram')
+diagram.token = () => session.accessToken
+diagram.setAttribute('src', `https://api.plotwork.dev/v1/library/${id}.svg`)
+```
+
+| Rule | Why |
+|---|---|
+| The token goes only to an https address, or http on `localhost` | A bearer token over plain http could be read on the way. Anything else is refused as `address`. |
+| No cookie is ever sent | The API reads the token, not a session, so a page cannot borrow the person's Plotwork sign-in. |
+| Never an API key | A key in a page is a key anyone can copy. A token is the person's own and ends within an hour. |
+| A token set after a `signed-out` error loads again | So a page can show the element first and sign in after. |
 
 ## Theming
 
@@ -111,7 +143,7 @@ Set custom properties on the element: `--plotwork-height`, `--plotwork-paper`, `
 | Directive | Needs |
 |---|---|
 | `img-src` | `blob:` (the picture is shown from a `blob:` address) |
-| `connect-src` | the origin of each `src`, such as `https://cdn.plotwork.dev` |
+| `connect-src` | the origin of each `src`, such as `https://cdn.plotwork.dev`, and `https://api.plotwork.dev` for pictures of a library |
 
 ## See also
 

@@ -60,6 +60,53 @@ describe('<plotwork-diagram>', () => {
     expect(element.source()).toBeNull()
   })
 
+  it("sends a page's token as a bearer through the page's fetch, asked for at each request, never with a cookie", async () => {
+    const fetcher = vi.fn(async (_url: string, _init: RequestInit) => new Response(CHECKOUT_SVG, { headers: { etag: '"v1"' } }))
+    const global = vi.fn()
+    vi.stubGlobal('fetch', global)
+    const element = document.createElement('plotwork-diagram') as PlotworkDiagramElement
+    element.setAttribute('src', 'https://api.plotwork.dev/v1/library/abc.svg')
+    let issued = 0
+    // Set after the element is on the page, in the same task, as React's layout effects do: the first request still carries it.
+    document.body.append(element)
+    element.fetch = fetcher
+    element.token = async () => `pwa_${(issued += 1)}`
+    await settle()
+    expect(global).not.toHaveBeenCalled()
+    expect(fetcher).toHaveBeenCalledTimes(1)
+    const [url, init] = fetcher.mock.calls[0] ?? []
+    expect(url).toBe('https://api.plotwork.dev/v1/library/abc.svg')
+    expect(init).toMatchObject({ credentials: 'omit', cache: 'default', headers: { Authorization: 'Bearer pwa_1', Accept: 'image/svg+xml' } })
+    await element.reload()
+    expect(fetcher.mock.calls[1]?.[1]).toMatchObject({ cache: 'no-cache', headers: { Authorization: 'Bearer pwa_2' } })
+  })
+
+  it('says to sign in on a 401, and loads again when a token arrives', async () => {
+    const fetcher = vi.fn(async (_url: string, init: RequestInit) => {
+      const signedIn = (init.headers as Record<string, string>).Authorization !== undefined
+      return signedIn ? new Response(CHECKOUT_SVG) : new Response('{}', { status: 401 })
+    })
+    const { element, events, part } = mount({ src: 'https://api.plotwork.dev/v1/library/abc.svg' })
+    element.fetch = fetcher
+    await settle()
+    expect(events['plotwork-error']).toEqual([{ reason: 'signed-out' }])
+    expect(part<HTMLElement>('.notice').textContent).toBe('Sign in to see this diagram.')
+    element.token = 'pwa_1'
+    await settle()
+    expect(events['plotwork-load']).toHaveLength(1)
+    expect(fetcher).toHaveBeenCalledTimes(2)
+  })
+
+  it('never sends a token over plain http to another host', async () => {
+    const fetcher = vi.fn(async () => new Response(CHECKOUT_SVG))
+    const { element, events } = mount({ src: 'http://example.com/picture.svg' })
+    element.fetch = fetcher
+    element.token = 'pwa_1'
+    await settle()
+    expect(fetcher).not.toHaveBeenCalled()
+    expect(events['plotwork-error']).toEqual([{ reason: 'address' }])
+  })
+
   it('refuses a picture whose fingerprint is not the pinned one, and says why', async () => {
     const { events, part } = mount({ fingerprint: `sha256-${'0'.repeat(64)}` }, CHECKOUT_SVG)
     await settle()

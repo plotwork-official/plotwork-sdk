@@ -61,6 +61,27 @@ describe('<PlotworkDiagram>', () => {
     await act(async () => root.unmount())
   })
 
+  it("hands the token and fetch to the element before its first request, and a new token function each render costs no request", async () => {
+    const fetcher = vi.fn(async (_url: string, _init: RequestInit) => new Response(CHECKOUT_SVG))
+    const onLoad = vi.fn()
+    const host = document.createElement('div')
+    document.body.append(host)
+    const root = createRoot(host)
+    const draw = (): Promise<void> =>
+      act(async () => {
+        root.render(<PlotworkDiagram src="https://api.plotwork.dev/v1/library/abc.svg" token={() => 'pwa_1'} fetch={fetcher} onLoad={onLoad} />)
+      })
+    await draw()
+    await act(settle)
+    expect(fetcher).toHaveBeenCalledTimes(1)
+    expect(fetcher.mock.calls[0]?.[1]).toMatchObject({ credentials: 'omit', headers: { Authorization: 'Bearer pwa_1' } })
+    expect(onLoad).toHaveBeenCalledTimes(1)
+    await draw()
+    await act(settle)
+    expect(fetcher).toHaveBeenCalledTimes(1)
+    await act(async () => root.unmount())
+  })
+
   it('renders on a server as the bare element, with no browser in sight', () => {
     expect(renderToString(<PlotworkDiagram src="/a.svg" live />)).toBe('<plotwork-diagram src="/a.svg" live=""></plotwork-diagram>')
   })
