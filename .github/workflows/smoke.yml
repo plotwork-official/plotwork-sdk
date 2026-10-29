@@ -1,0 +1,63 @@
+name: Smoke
+
+# Does what a customer does, against the real preview and production deployments, with the packages as the registries serve them:
+# installs them into a new app, calls the API, builds with Vite, publishes to a stable link, and watches the live viewer swap the
+# new version in, in Chromium. See smoke/README.md.
+#
+# Runs after every publish, every night (an API or CDN change can break a release that has not changed), and by hand. Each
+# environment `preview` and `production` holds the secret PLOTWORK_API_KEY: a personal key of the smoke test account there.
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Where to run
+        type: choice
+        options: [both, preview, production]
+        default: both
+      version:
+        description: The npm version or dist-tag of every package
+        type: string
+        default: latest
+  workflow_run:
+    workflows: [Publish]
+    types: [completed]
+  schedule:
+    - cron: '17 5 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  npm:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: ${{ fromJSON(github.event_name == 'workflow_dispatch' && inputs.environment != 'both' && format('["{0}"]', inputs.environment) || '["preview","production"]') }}
+    name: npm on ${{ matrix.environment }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: ${{ matrix.environment }}
+    # Two runs on one deployment would move the same stable link under each other.
+    concurrency:
+      group: smoke-npm-${{ matrix.environment }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - name: Install the test's own tools (frozen lockfile, no install scripts)
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Install Chromium
+        run: pnpm exec playwright-core install --with-deps chromium
+      - name: Smoke test
+        env:
+          PLOTWORK_API_KEY: ${{ secrets.PLOTWORK_API_KEY }}
+          VERSION: ${{ inputs.version || 'latest' }}
+          ENVIRONMENT: ${{ matrix.environment }}
+        run: node smoke/run.mjs --env "$ENVIRONMENT" --version "$VERSION"

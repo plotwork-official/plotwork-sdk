@@ -54,14 +54,9 @@ function PlotworkDiagramInner(props: PlotworkDiagramProps, ref: Ref<PlotworkDiag
     definePlotworkDiagram()
   }, [])
 
+  // Listens before the picture is handed over below: a picture the page already holds loads within a few microtasks, which
+  // can be before a passive effect runs, and its `plotwork-load` would be missed.
   useClientLayoutEffect(() => {
-    const node = element.current
-    if (node === null) return
-    node.labels = props.labels
-    node.svg = props.svg ?? null
-  }, [props.svg, props.labels])
-
-  useEffect(() => {
     const node = element.current
     if (node === null) return undefined
     const listeners = Object.entries(EVENTS).map(([type, prop]) => {
@@ -76,6 +71,13 @@ function PlotworkDiagramInner(props: PlotworkDiagramProps, ref: Ref<PlotworkDiag
       for (const remove of listeners) remove()
     }
   }, [])
+
+  useClientLayoutEffect(() => {
+    const node = element.current
+    if (node === null) return
+    node.labels = props.labels
+    node.svg = props.svg ?? null
+  }, [props.svg, props.labels])
 
   return createElement(TAG_NAME, {
     ref: element,
