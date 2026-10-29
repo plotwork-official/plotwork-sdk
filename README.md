@@ -299,6 +299,7 @@ pnpm check
 | [Python client](./python/README.md) | The same calls from Python |
 | [Examples](./examples/README.md) | Next.js, React and Vite, and a plain page |
 | [Picture contract](./spec/picture.md) | What every SDK reads from a picture |
+| [Editor design](./docs/editor-design.md) | A proposed `@plotwork.official/editor`: edit a `.diagram` in a page and see it redrawn |
 | [Plotwork docs](https://docs.plotwork.dev) | Writing diagrams, the command line, the MCP server, organisations |
 
 <p align="center"><sub>MIT licence. Cloud provider names and icons in diagrams are trademarks of their owners.</sub></p>
