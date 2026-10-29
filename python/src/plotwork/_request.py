@@ -15,7 +15,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from typing import Any, Callable, Mapping, Optional
+from typing import Any, Callable, Mapping, Optional, Tuple, Union
 
 from ._version import __version__
 
@@ -25,6 +25,10 @@ MAX_RETRY_WAIT = 30.0
 #: Opens a ``urllib.request.Request`` and returns the response, called like ``urllib.request.urlopen(request, timeout=...)``.
 #: It may raise ``urllib.error.HTTPError`` for a status that is not 2xx, as ``urlopen`` does, or return that response.
 Opener = Callable[..., Any]
+
+#: A token from Sign in with Plotwork, or a function that returns the current one; it is called before each attempt, so it can
+#: refresh the token first.
+AccessToken = Union[str, Callable[[], str]]
 
 
 class PlotworkApiError(Exception):
@@ -130,9 +134,11 @@ class Transport:
         max_retries: int,
         opener: Optional[Opener] = None,
         sleep: Optional[Callable[[float], Any]] = None,
+        access_token: Optional[AccessToken] = None,
     ) -> None:
         self.base_url = base_url
         self.headers = dict(headers)
+        self.access_token = access_token
         self.timeout = timeout
         self.max_retries = max(0, max_retries)
         self.opener: Opener = opener if opener is not None else _default_opener()
@@ -146,19 +152,18 @@ class Transport:
         pairs = [(name, _query_value(value)) for name, value in (query or {}).items() if value is not None]
         return f"{url}?{urllib.parse.urlencode(pairs)}" if pairs else url
 
-    def request(self, method: str, path: str, *, idempotent: bool, body: Any = None, query: Optional[Mapping[str, Any]] = None) -> Any:
-        """Sends one request and returns the decoded JSON answer, or raises ``PlotworkApiError``."""
+    def _bearer(self) -> Mapping[str, str]:
+        token = self.access_token
+        value = token() if callable(token) else token
+        return {"Authorization": f"Bearer {value}"} if value else {}
+
+    def _send(self, method: str, url: str, *, idempotent: bool, headers: Mapping[str, str], data: Optional[bytes]) -> Tuple[int, bytes, Any]:
+        """Sends one request, retrying a safe one on 429 and 503, and returns the status, body and headers of a 2xx or 304 answer."""
         retries = self.max_retries if idempotent else 0
-        headers = {"Accept": "application/json", "User-Agent": f"plotwork-python/{__version__}"}
-        data = None
-        if body is not None:
-            headers["Content-Type"] = "application/json"
-            data = json.dumps(body, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
-        headers.update(self.headers)
-        url = self.url_of(path, query)
         attempt = 0
         while True:
-            prepared = urllib.request.Request(url, data=data, headers=headers, method=method)
+            # Asked again before every attempt, so a function can hand over a refreshed token.
+            prepared = urllib.request.Request(url, data=data, headers={**headers, **self.headers, **self._bearer()}, method=method)
             try:
                 response = self.opener(prepared, timeout=self.timeout)
             except urllib.error.HTTPError as answer:
@@ -167,12 +172,12 @@ class Transport:
                 raise _no_answer(error) from None
             try:
                 status = _status_of(response)
-                if 200 <= status < 300:
+                if 200 <= status < 300 or status == 304:
                     try:
-                        raw = response.read()
+                        raw = b"" if status == 304 else response.read()
                     except OSError as error:
                         raise _no_answer(error) from None
-                    return None if status == 204 or raw == b"" else json.loads(raw.decode("utf-8"))
+                    return status, raw, getattr(response, "headers", None)
                 if status in (429, 503) and attempt < retries:
                     attempt += 1
                     self.sleep(retry_delay(_header(response, "retry-after"), attempt))
@@ -186,3 +191,28 @@ class Transport:
                 close = getattr(response, "close", None)
                 if close is not None:
                     close()
+
+    def request(self, method: str, path: str, *, idempotent: bool, body: Any = None, query: Optional[Mapping[str, Any]] = None) -> Any:
+        """Sends one request and returns the decoded JSON answer, or raises ``PlotworkApiError``."""
+        headers = {"Accept": "application/json", "User-Agent": f"plotwork-python/{__version__}"}
+        data = None
+        if body is not None:
+            headers["Content-Type"] = "application/json"
+            data = json.dumps(body, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+        status, raw, _ = self._send(method, self.url_of(path, query), idempotent=idempotent, headers=headers, data=data)
+        if status == 304:
+            raise PlotworkApiError(304, "http.304", "The Plotwork API answered 304 to a call that sent no tag")
+        return None if status == 204 or raw == b"" else json.loads(raw.decode("utf-8"))
+
+    def request_text(self, path: str, *, accept: str, etag: Optional[str] = None) -> Optional[Tuple[str, Optional[str]]]:
+        """Sends a GET for text and returns it with its ``ETag``; ``None`` when ``etag`` is given and the server answers 304."""
+        headers = {"Accept": accept, "User-Agent": f"plotwork-python/{__version__}"}
+        if etag is not None:
+            headers["If-None-Match"] = etag
+        status, raw, answer_headers = self._send("GET", self.url_of(path), idempotent=True, headers=headers, data=None)
+        if status == 304:
+            if etag is None:
+                raise PlotworkApiError(304, "http.304", "The Plotwork API answered 304 to a call that sent no tag")
+            return None
+        tag = None if answer_headers is None else answer_headers.get("etag")
+        return raw.decode("utf-8"), None if tag is None else str(tag)
