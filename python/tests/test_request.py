@@ -41,6 +41,12 @@ def test_sends_camel_case_keys_as_the_api_names_them(api: FakeApi) -> None:
     assert api.seen[0].json() == {"source": SOURCE, "embedSource": True, "idPrefix": "a"}
 
 
+def test_keeps_the_path_of_a_base_address(api: FakeApi) -> None:
+    api.answer(Answer(body={"valid": True, "errors": [], "warnings": []}))
+    Plotwork(base_url=f"{api.url}/plotwork", sleep=lambda _: None).diagrams.validate(source=SOURCE)
+    assert api.seen[0].path == "/plotwork/v1/diagrams/validate"
+
+
 def test_puts_a_get_input_in_the_query_and_sends_no_key_when_there_is_none(api: FakeApi) -> None:
     api.answer(Answer(body={"results": []}))
     client(api, []).icons.search(q="token exchange", limit=5)

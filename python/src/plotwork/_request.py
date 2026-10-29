@@ -141,7 +141,8 @@ class Transport:
     def url_of(self, path: str, query: Optional[Mapping[str, Any]] = None) -> str:
         """The address of ``path`` on the base address, with every query value that is not ``None``."""
         base = self.base_url if self.base_url.endswith("/") else f"{self.base_url}/"
-        url = urllib.parse.urljoin(base, path)
+        # Relative to the base, so a base with a path (a proxy at /plotwork, an engine under a prefix) keeps it.
+        url = urllib.parse.urljoin(base, path.lstrip("/"))
         pairs = [(name, _query_value(value)) for name, value in (query or {}).items() if value is not None]
         return f"{url}?{urllib.parse.urlencode(pairs)}" if pairs else url
 

@@ -31,6 +31,13 @@ describe('the Plotwork client', () => {
     expect(JSON.parse(String(calls[0]?.init.body))).toEqual({ source: 'flow "A"\nnode a service "A"\n' })
   })
 
+  it('keeps the path of a base address, as a proxy or an engine under a prefix has', async () => {
+    const { fetcher, calls } = fakeFetch(json({ valid: true, errors: [], warnings: [] }), json({ valid: true, errors: [], warnings: [] }))
+    await new Plotwork({ baseUrl: 'https://example.com/plotwork', fetch: fetcher }).diagrams.validate({ source: 'flow "A"\n' })
+    await new Plotwork({ baseUrl: 'https://example.com/plotwork/', fetch: fetcher }).diagrams.validate({ source: 'flow "A"\n' })
+    expect(calls.map((call) => call.url)).toEqual(['https://example.com/plotwork/v1/diagrams/validate', 'https://example.com/plotwork/v1/diagrams/validate'])
+  })
+
   it('puts a GET operation input in the query, and sends nothing to sign in with when there is no key', async () => {
     const { fetcher, calls } = fakeFetch(json({ results: [] }))
     const plotwork = new Plotwork({ baseUrl: 'https://api-preview.plotwork.dev', fetch: fetcher })

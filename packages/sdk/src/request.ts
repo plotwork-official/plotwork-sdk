@@ -60,7 +60,8 @@ export interface Transport {
 const MAX_RETRY_WAIT_MS = 30_000
 
 function urlOf(transport: Transport, spec: RequestSpec): string {
-  const url = new URL(spec.path, transport.baseUrl.endsWith('/') ? transport.baseUrl : `${transport.baseUrl}/`)
+  // Relative to the base, so a base with a path (a proxy at /plotwork, an engine under a prefix) keeps it.
+  const url = new URL(spec.path.replace(/^\/+/, ''), transport.baseUrl.endsWith('/') ? transport.baseUrl : `${transport.baseUrl}/`)
   for (const [name, value] of Object.entries(spec.query ?? {})) if (value !== undefined) url.searchParams.set(name, String(value))
   return url.href
 }
