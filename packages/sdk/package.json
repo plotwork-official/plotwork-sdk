@@ -1,6 +1,6 @@
 {
   "name": "@plotwork.official/sdk",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "The Plotwork API from TypeScript: every /v1 operation typed from the OpenAPI document, on fetch alone, with no runtime dependencies.",
   "license": "MIT",
   "type": "module",
@@ -10,15 +10,33 @@
     "url": "git+https://github.com/plotwork-official/plotwork-sdk.git",
     "directory": "packages/sdk"
   },
-  "keywords": ["plotwork", "diagram", "api", "sdk", "typescript", "openapi"],
+  "keywords": [
+    "plotwork",
+    "diagram",
+    "api",
+    "sdk",
+    "typescript",
+    "openapi",
+    "oauth",
+    "pkce"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
+    "./oauth": {
+      "types": "./dist/oauth/index.d.ts",
+      "default": "./dist/oauth/index.js"
+    },
     "./package.json": "./package.json"
   },
-  "files": ["dist", "!dist/**/__tests__", "README.md", "LICENSE"],
+  "files": [
+    "dist",
+    "!dist/**/__tests__",
+    "README.md",
+    "LICENSE"
+  ],
   "sideEffects": false,
   "engines": {
     "node": ">=20"

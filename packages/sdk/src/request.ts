@@ -17,6 +17,10 @@ export interface CallOptions {
 export interface RequestSpec {
   method: 'GET' | 'POST'
   path: string
+  /** What to ask for: JSON by default. */
+  accept?: string | undefined
+  /** Headers of this request alone, such as `If-None-Match`. */
+  headers?: Readonly<Record<string, string>> | undefined
   /** True when sending it twice does nothing more than once: every operation but publishing. */
   idempotent: boolean
   body?: unknown
@@ -45,10 +49,15 @@ export class PlotworkApiError extends Error {
   }
 }
 
+/** An access token, or a function that gives the current one before each request (so a caller can refresh it). */
+export type AccessTokenSource = string | (() => string | Promise<string>)
+
 /** How the client sends requests. */
 export interface Transport {
   baseUrl: string
   headers: Readonly<Record<string, string>>
+  /** Sent as `Authorization: Bearer`; a function is called before each attempt. */
+  accessToken?: AccessTokenSource | undefined
   fetch: typeof fetch
   timeoutMs: number
   maxRetries: number
@@ -59,7 +68,8 @@ export interface Transport {
 /** The longest a client waits before one retry, whatever `Retry-After` says. */
 const MAX_RETRY_WAIT_MS = 30_000
 
-function urlOf(transport: Transport, spec: RequestSpec): string {
+/** The address of `path` on the client's base address. */
+export function urlOf(transport: Pick<Transport, 'baseUrl'>, spec: Pick<RequestSpec, 'path' | 'query'>): string {
   // Relative to the base, so a base with a path (a proxy at /plotwork, an engine under a prefix) keeps it.
   const url = new URL(spec.path.replace(/^\/+/, ''), transport.baseUrl.endsWith('/') ? transport.baseUrl : `${transport.baseUrl}/`)
   for (const [name, value] of Object.entries(spec.query ?? {})) if (value !== undefined) url.searchParams.set(name, String(value))
@@ -88,11 +98,22 @@ async function errorOf(response: Response): Promise<PlotworkApiError> {
   return new PlotworkApiError(response.status, `http.${response.status}`, `The Plotwork API answered HTTP ${response.status}`, undefined, requestId)
 }
 
-/** The `request` the generated operations call, bound to one transport. */
-export function createRequest(transport: Transport): Request {
-  return async function request<T>(spec: RequestSpec, options: CallOptions = {}): Promise<T> {
+async function bearerOf(token: AccessTokenSource | undefined): Promise<Record<string, string>> {
+  if (token === undefined) return {}
+  const value = typeof token === 'string' ? token : await token()
+  return value === '' ? {} : { Authorization: `Bearer ${value}` }
+}
+
+/**
+ * Sends one request and returns the answer when it is 2xx or 304, retrying a safe call on 429 and 503. Anything else is a
+ * `PlotworkApiError`. The caller reads the body.
+ */
+export function createSend(transport: Transport): (spec: RequestSpec, options?: CallOptions) => Promise<Response> {
+  return async function send(spec: RequestSpec, options: CallOptions = {}): Promise<Response> {
     const retries = spec.idempotent ? transport.maxRetries : 0
     for (let attempt = 0; ; attempt += 1) {
+      // Asked again before every attempt, so a function can hand over a refreshed token.
+      const bearer = await bearerOf(transport.accessToken)
       const timeout = new AbortController()
       const timer = setTimeout(() => timeout.abort(), options.timeoutMs ?? transport.timeoutMs)
       const stop = (): void => timeout.abort()
@@ -101,7 +122,7 @@ export function createRequest(transport: Transport): Request {
       try {
         response = await transport.fetch(urlOf(transport, spec), {
           method: spec.method,
-          headers: { Accept: 'application/json', ...(spec.body === undefined ? {} : { 'Content-Type': 'application/json' }), ...transport.headers },
+          headers: { Accept: spec.accept ?? 'application/json', ...(spec.body === undefined ? {} : { 'Content-Type': 'application/json' }), ...spec.headers, ...transport.headers, ...bearer },
           body: spec.body === undefined ? null : JSON.stringify(spec.body),
           signal: timeout.signal,
         })
@@ -113,7 +134,7 @@ export function createRequest(transport: Transport): Request {
         clearTimeout(timer)
         options.signal?.removeEventListener('abort', stop)
       }
-      if (response.ok) return (response.status === 204 ? undefined : await response.json()) as T
+      if (response.ok || response.status === 304) return response
       if ((response.status === 429 || response.status === 503) && attempt < retries) {
         await response.body?.cancel()
         await transport.sleep(retryDelay(response.headers.get('retry-after'), attempt + 1))
@@ -121,5 +142,15 @@ export function createRequest(transport: Transport): Request {
       }
       throw await errorOf(response)
     }
+  }
+}
+
+/** The `request` the generated operations call, bound to one transport: the answer's JSON. */
+export function createRequest(transport: Transport): Request {
+  const send = createSend(transport)
+  return async function request<T>(spec: RequestSpec, options: CallOptions = {}): Promise<T> {
+    const response = await send(spec, options)
+    if (response.status === 304) throw new PlotworkApiError(304, 'http.304', 'The Plotwork API answered 304 to a call that sent no tag')
+    return (response.status === 204 ? undefined : await response.json()) as T
   }
 }

@@ -15,5 +15,7 @@ Code here follows:
 | Path | Purpose |
 |---|---|
 | `index.ts` | `Plotwork`, the client: the key or token, the base address, and the generated operations on it. |
-| `request.ts` | `createRequest`: sends one request, reads the answer, retries 429 and 503 for safe calls, and turns the API's error envelope into `PlotworkApiError`. |
+| `request.ts` | `createSend`: sends one request with the key or a bearer token asked for before each attempt, retries 429 and 503 for safe calls, and turns the API's error envelope into `PlotworkApiError`. `createRequest` reads its JSON. |
+| `library.ts` | `library.picture` and `library.pictureUrl`: the SVG of a picture of the library with its ETag, written by hand because it is not JSON. |
+| `oauth/` | `@plotwork.official/sdk/oauth`: Sign in with Plotwork. See its README. |
 | `generated.ts` | Every schema as a type and every operation as a typed call, written by `pnpm gen:sdk`. Never edited by hand; `pnpm check` fails when it is stale. |

@@ -79,9 +79,43 @@ describe('the Plotwork client', () => {
     expect(retryDelay('3600', 1)).toBe(30_000)
   })
 
+  it('sends an access token as a bearer, asking a function for it before every attempt', async () => {
+    const { fetcher, calls } = fakeFetch(json({ error: true, errorCode: 'service.busy', message: 'Busy' }, 503, { 'retry-after': '0' }), json({ id: 'u1', name: 'Ada', organisation: null }))
+    let issued = 0
+    const plotwork = new Plotwork({ accessToken: async () => `pwa_${(issued += 1)}`, fetch: fetcher, maxRetries: 1 })
+    const me = await plotwork.me()
+    expect(me.name).toBe('Ada')
+    expect(calls.map((call) => (call.init.headers as Record<string, string>).Authorization)).toEqual(['Bearer pwa_1', 'Bearer pwa_2'])
+    expect(calls[0]?.init.headers).not.toHaveProperty('X-API-Key')
+  })
+
+  it('refuses a key and a token together', () => {
+    expect(() => new Plotwork({ apiKey: 'pk_test', accessToken: 'pwa_1' })).toThrow(TypeError)
+  })
+
+  it('lists the library, and reads a picture as text with its tag, null when it has not changed', async () => {
+    const { fetcher, calls } = fakeFetch(
+      json({ items: [], nextCursor: null }),
+      new Response('<svg xmlns="http://www.w3.org/2000/svg"/>', { status: 200, headers: { 'content-type': 'image/svg+xml', etag: '"abc"' } }),
+      new Response(null, { status: 304, headers: { etag: '"abc"' } }),
+    )
+    const plotwork = new Plotwork({ accessToken: 'pwa_1', baseUrl: 'https://api-preview.plotwork.dev', fetch: fetcher })
+    await plotwork.library.list({ folder: 'Payments', limit: 10 })
+    expect(calls[0]?.url).toBe('https://api-preview.plotwork.dev/v1/library?folder=Payments&limit=10')
+    const id = '6f1c2d3e-0000-4000-8000-000000000001'
+    expect(plotwork.library.pictureUrl(id)).toBe(`https://api-preview.plotwork.dev/v1/library/${id}.svg`)
+    expect(await plotwork.library.picture(id)).toEqual({ svg: '<svg xmlns="http://www.w3.org/2000/svg"/>', etag: '"abc"' })
+    expect(calls[1]?.init.headers).toMatchObject({ Accept: 'image/svg+xml', Authorization: 'Bearer pwa_1' })
+    expect(await plotwork.library.picture(id, { etag: '"abc"' })).toBeNull()
+    expect(calls[2]?.init.headers).toMatchObject({ 'If-None-Match': '"abc"' })
+  })
+
   it('covers every public operation of the spec', () => {
     expect(OPERATION_PATHS).toContain('POST /v1/diagrams/publish')
     expect(OPERATION_PATHS).toContain('GET /v1/icons')
+    expect(OPERATION_PATHS).toEqual(expect.arrayContaining(['GET /v1/me', 'GET /v1/library', 'POST /v1/diagrams/embed']))
+    // The picture is SVG text, written by hand as library.picture, not a generated JSON call.
+    expect(OPERATION_PATHS.some((path) => path.endsWith('.svg'))).toBe(false)
     expect(OPERATION_PATHS.some((path) => path.includes('/boards'))).toBe(false)
   })
 })
