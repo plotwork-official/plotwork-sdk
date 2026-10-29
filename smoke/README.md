@@ -6,7 +6,7 @@ Does what a customer does, against the real preview and production deployments, 
 
 | Question | Answer |
 |---|---|
-| How do I run it? | `PLOTWORK_API_KEY=<personal key> node smoke/run.mjs --env preview` (or `production`). |
+| How do I run it? | `PLOTWORK_API_KEY=<personal key> node smoke/run.mjs --env preview` (or `production`); for Python, `PLOTWORK_BASE_URL=https://api-preview.plotwork.dev PLOTWORK_API_KEY=<key> python python/smoke.py` with `plotwork` installed. |
 | Which versions? | `latest` of every package; `--version 0.1.1`, or `--viewer`, `--vite`, `--sdk` for one each. |
 | What key? | A personal key of the smoke test account on that deployment. An organisation key publishes into a private library, which has no public link to watch. |
 | When does CI run it? | After every publish, every night, and by hand: [`smoke.yml`](../.github/workflows/smoke.yml). |
@@ -25,6 +25,8 @@ In a new folder outside this repository it installs `@plotwork.official/viewer`,
 | 5 | Fetch the stable link | The CDN serves the SVG with `access-control-allow-origin: *` and an ETag, and answers `304` to a check with that ETag |
 | 6 | Open the app in Chromium | The bundled diagram loads with the plugin's fingerprint, and the live viewer loads the stable link from another origin |
 | 7 | Publish version b | The live viewer swaps it in by itself and reports `plotwork-change` |
+
+The job `PyPI` in the same workflow installs `plotwork` from PyPI into a clean Python and runs [`python/smoke.py`](../python/smoke.py) with the same key: a wrong key refused, vocabulary, validate, render, icon search, and a publish whose picture the CDN serves with CORS.
 
 ## Setting it up
 

@@ -19,8 +19,12 @@ on:
         description: The npm version or dist-tag of every package
         type: string
         default: latest
+      python_version:
+        description: The PyPI version of plotwork, or empty for the newest
+        type: string
+        default: ''
   workflow_run:
-    workflows: [Publish]
+    workflows: [Publish, Publish Python]
     types: [completed]
   schedule:
     - cron: '17 5 * * *'
@@ -61,3 +65,42 @@ jobs:
           VERSION: ${{ inputs.version || 'latest' }}
           ENVIRONMENT: ${{ matrix.environment }}
         run: node smoke/run.mjs --env "$ENVIRONMENT" --version "$VERSION"
+
+  pypi:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: ${{ fromJSON(github.event_name == 'workflow_dispatch' && inputs.environment != 'both' && format('["{0}"]', inputs.environment) || '["preview","production"]') }}
+    name: PyPI on ${{ matrix.environment }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: ${{ matrix.environment }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: python/smoke.py
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.13'
+      # From PyPI, as a customer installs it; a version published a minute ago can take a moment to be served.
+      - name: Install plotwork from PyPI
+        env:
+          PYTHON_VERSION: ${{ inputs.python_version }}
+        run: |
+          spec="plotwork${PYTHON_VERSION:+==$PYTHON_VERSION}"
+          for attempt in 1 2 3 4 5; do
+            python -m pip install --no-cache-dir --only-binary=:all: "$spec" && break
+            [ "$attempt" = 5 ] && exit 1
+            sleep 30
+          done
+          python -m pip show plotwork | grep -E '^(Version|Requires):'
+      - name: Smoke test
+        working-directory: ${{ runner.temp }}
+        env:
+          PLOTWORK_API_KEY: ${{ secrets.PLOTWORK_API_KEY }}
+          PLOTWORK_BASE_URL: ${{ matrix.environment == 'production' && 'https://api.plotwork.dev' || 'https://api-preview.plotwork.dev' }}
+          SMOKE: ${{ github.workspace }}/python/smoke.py
+        run: python "$SMOKE"
