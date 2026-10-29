@@ -97,7 +97,7 @@ export const LIBRARY_CSS = `
   font-size: 11px;
 }
 .notice { margin: auto; max-inline-size: 36ch; text-align: center; font-size: 14px; }
-.notice[hidden], button[hidden] { display: none; }
+.notice[hidden], button[hidden], .search[hidden] { display: none; }
 button {
   align-self: center;
   padding: 6px 14px;

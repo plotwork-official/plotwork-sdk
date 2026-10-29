@@ -230,6 +230,7 @@ export function createPlotworkLibraryClass(): CustomElementConstructor {
       const { search, list, notice, retry, more, live } = this.#shell
       const count = this.#listbox.set(this.#items, search.value)
       const query = search.value.trim()
+      search.hidden = this.#items.length === 0
       list.hidden = count === 0
       retry.hidden = true
       more.hidden = this.#cursor === null
@@ -239,7 +240,8 @@ export function createPlotworkLibraryClass(): CustomElementConstructor {
     }
 
     #fail(reason: LibraryFailure): void {
-      const { list, notice, retry, more, live } = this.#shell
+      const { search, list, notice, retry, more, live } = this.#shell
+      search.hidden = true
       this.#failure = reason
       this.#loaded = false
       this.#items = []
