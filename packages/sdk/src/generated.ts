@@ -600,6 +600,50 @@ export type EditDiagramResponse = {
   next: string
 }
 
+/** A Plotwork picture to show with the viewer, and how. */
+export type EmbedDiagramInput = {
+  /** A hosted picture (/d/), stable link (/l/) or organisation embed link (/o/) on cdn.plotwork.dev. Never fetched. */
+  url?: string
+  /** The text of a Plotwork SVG; needed to pin. */
+  svg?: string
+  /** Where the page serves svg from, when there is no url. */
+  path?: string
+  /** html for any page, react for React. */
+  format?: "html" | "react"
+  /** Follow new versions: /l/ and /o/ links only. */
+  live?: boolean
+  /** Show only exactly this picture: needs svg. */
+  pin?: boolean
+  /** What the diagram shows, for a screen reader. */
+  label?: string
+}
+
+/** A snippet that shows a Plotwork picture with the viewer. */
+export type EmbedDiagramResponse = {
+  /** False when the url is not a hosted picture or the svg is not an SVG; message and hint say why. */
+  ok: boolean
+  /** The code to paste into the page or component, or null when ok is false. */
+  snippet: string | null
+  /** The command that installs the viewer. */
+  install: string
+  /** The address the snippet loads the picture from. */
+  src: string | null
+  /** picture (/d/), stable (/l/), organisation (/o/), or null for a file the page serves. */
+  linkKind: "picture" | "stable" | "organisation" | null
+  /** sha256-<hex> of the svg text, whether or not the snippet pins it; null without svg. */
+  fingerprint: string | null
+  /** True when the snippet carries live. */
+  live: boolean
+  /** True when the snippet carries fingerprint. */
+  pinned: boolean
+  /** Each choice left out and why, and what to know about the link. */
+  notes: string[]
+  /** What happened, in one sentence. */
+  message: string
+  /** What to send instead, when ok is false. */
+  hint: string | null
+}
+
 /** Standard error envelope used by every failing response. */
 export type ErrorResponse = {
   /** Always true, so clients can branch without reading the status. */
@@ -951,6 +995,22 @@ export type ImportSourceResponse = {
   next: string
 }
 
+export type LibraryPage = {
+  items: {
+    id: string
+    name: string | null
+    folder: string | null
+    /** The color scheme it was drawn in: light, dark, or auto. */
+    scheme: "light" | "dark" | "auto"
+    bytes: number
+    /** When it was last published, in milliseconds since the epoch. */
+    updatedAt: number
+    /** Its label in an organisation's library, or null for a person's own diagram. */
+    classification: "public" | "internal" | "confidential" | null
+  }[]
+  nextCursor: string | null
+}
+
 /** Names to find icons for, and an optional provider to look in first. */
 export type MapIconsInput = {
   /** Services, products, or ideas to find icons for, written as the user wrote them ("S3", "Postgres", "load balancer"). Up to 40 names of up to 80 characters. */
@@ -993,6 +1053,19 @@ export type MapIconsResponse = {
   ambiguousCount: number
   /** How many names matched nothing. */
   gapCount: number
+}
+
+export type Me = {
+  id: string
+  name: string | null
+  /** The account's address: for a key always, for an app only with the email scope. */
+  email?: string
+  /** The organisation the key or the grant is for, or null. */
+  organisation: {
+    id: string
+    slug: string
+    name: string
+  } | null
 }
 
 /** An information note with its place in the source. */
@@ -1742,6 +1815,9 @@ export function operations(request: Request) {
       /** Change diagram source with small typed operations. `POST /v1/diagrams/edit` */
       edit: (input: EditDiagramInput, options?: CallOptions): Promise<EditDiagramResponse> =>
         request<EditDiagramResponse>({ method: 'POST', path: '/v1/diagrams/edit', idempotent: true, body: input }, options),
+      /** Write a snippet that shows a picture with the viewer. `POST /v1/diagrams/embed` */
+      embed: (input: EmbedDiagramInput, options?: CallOptions): Promise<EmbedDiagramResponse> =>
+        request<EmbedDiagramResponse>({ method: 'POST', path: '/v1/diagrams/embed', idempotent: true, body: input }, options),
       /** Describe diagram source as text. `POST /v1/diagrams/outline` */
       outline: (input: DiagramSourceInput, options?: CallOptions): Promise<OutlineResponse> =>
         request<OutlineResponse>({ method: 'POST', path: '/v1/diagrams/outline', idempotent: true, body: input }, options),
@@ -1772,6 +1848,11 @@ export function operations(request: Request) {
     /** Turn a file of another format into a diagram. `POST /v1/import` */
     importSource: (input: ImportSourceInput, options?: CallOptions): Promise<ImportSourceResponse> =>
       request<ImportSourceResponse>({ method: 'POST', path: '/v1/import', idempotent: true, body: input }, options),
+    library: {
+      /** List the diagrams a key or an app's token can see. `GET /v1/library` */
+      list: (input?: { limit?: number; cursor?: string; folder?: string }, options?: CallOptions): Promise<LibraryPage> =>
+        request<LibraryPage>({ method: 'GET', path: '/v1/library', idempotent: true, query: input }, options),
+    },
     markdown: {
       /** Find the sections of a document a picture would help. `POST /v1/markdown/plan` */
       plan: (input: PlanDocumentInput, options?: CallOptions): Promise<PlanDocumentResponse> =>
@@ -1780,6 +1861,9 @@ export function operations(request: Request) {
       sync: (input: SyncMarkdownInput, options?: CallOptions): Promise<SyncMarkdownResponse> =>
         request<SyncMarkdownResponse>({ method: 'POST', path: '/v1/markdown/sync', idempotent: true, body: input }, options),
     },
+    /** Read who a key or an app's token acts as. `GET /v1/me` */
+    me: (options?: CallOptions): Promise<Me> =>
+      request<Me>({ method: 'GET', path: '/v1/me', idempotent: true }, options),
     patterns: {
       /** Check a pattern file. `POST /v1/patterns/check` */
       check: (input: CheckPatternInput, options?: CallOptions): Promise<CheckPatternResponse> =>
@@ -1808,6 +1892,7 @@ export const OPERATION_PATHS = [
   'POST /v1/diagrams/convert-mermaid',
   'POST /v1/diagrams/draw',
   'POST /v1/diagrams/edit',
+  'POST /v1/diagrams/embed',
   'POST /v1/diagrams/outline',
   'POST /v1/diagrams/publish',
   'POST /v1/diagrams/read',
@@ -1817,8 +1902,10 @@ export const OPERATION_PATHS = [
   'GET /v1/icons',
   'POST /v1/icons/map',
   'POST /v1/import',
+  'GET /v1/library',
   'POST /v1/markdown/plan',
   'POST /v1/markdown/sync',
+  'GET /v1/me',
   'POST /v1/patterns/check',
   'POST /v1/patterns/draw',
   'POST /v1/patterns/find',

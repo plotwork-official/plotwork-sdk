@@ -45,6 +45,9 @@ EXPECTED = {
     "POST /v1/diagrams/suggest": ["diagrams", "suggest"],
     "POST /v1/diagrams/convert-mermaid": ["diagrams", "convert_mermaid"],
     "POST /v1/diagrams/publish": ["diagrams", "publish"],
+    "POST /v1/diagrams/embed": ["diagrams", "embed"],
+    "GET /v1/me": ["me"],
+    "GET /v1/library": ["library", "list"],
     "POST /v1/import": ["import_source"],
     "POST /v1/markdown/sync": ["markdown", "sync"],
     "POST /v1/markdown/plan": ["markdown", "plan"],
@@ -63,7 +66,7 @@ def test_each_operation_sits_where_the_typescript_client_puts_it(operation: str)
     recorder = Recorder()
     client = Plotwork()
     client._transport = recorder  # type: ignore[assignment]
-    for group in ("diagrams", "icons", "markdown", "patterns"):
+    for group in ("diagrams", "icons", "library", "markdown", "patterns"):
         getattr(client, group)._transport = recorder
     call = method_for(client, EXPECTED[operation])
     if operation == "GET /v1/icons":
@@ -82,8 +85,10 @@ def test_lists_exactly_the_operations_placed_above() -> None:
 @pytest.mark.skipif(not SPEC.exists(), reason="spec/openapi.json is not beside this package (an unpacked sdist)")
 def test_every_path_in_the_spec_has_a_method() -> None:
     spec = json.loads(SPEC.read_text(encoding="utf-8"))
-    operations = sorted(f"{method.upper()} {path}" for path, item in spec["paths"].items() for method in item)
+    # The picture route answers SVG text, not JSON: it is written by hand as ``library.picture``.
+    operations = sorted(f"{method.upper()} {path}" for path, item in spec["paths"].items() for method in item if not path.endswith(".svg"))
     assert operations == sorted(OPERATION_PATHS)
+    assert "/v1/library/{id}.svg" in spec["paths"]
     client = Plotwork()
     for operation in operations:
         assert callable(method_for(client, EXPECTED[operation])), operation

@@ -14,9 +14,19 @@ export function placeOf(method, path) {
     const [only] = parts
     if (only === 'import') return ['importSource']
     if (only === 'icons' && method === 'get') return ['icons', 'search']
+    if (only === 'library' && method === 'get') return ['library', 'list']
     return [camel(only)]
   }
   return parts.map(camel)
+}
+
+/**
+ * True when the operation answers JSON, so the generators make it a typed call. `GET /v1/library/{id}.svg` answers the picture
+ * itself; each client writes that one by hand (`library.picture`, `library.pictureUrl`), since it is text with an ETag, not a value.
+ */
+export function isJsonOperation(operation) {
+  const success = Object.entries(operation.responses ?? {}).filter(([status]) => /^2\d\d$/.test(status))
+  return success.every(([, answer]) => answer.content === undefined || jsonSchema(answer.content) !== undefined)
 }
 
 /** True when sending the request twice does nothing more than once: every operation but publishing. */

@@ -376,6 +376,95 @@
         }
       }
     },
+    "/v1/diagrams/embed": {
+      "post": {
+        "tags": [
+          "Diagrams"
+        ],
+        "summary": "Write a snippet that shows a picture with the viewer.",
+        "description": "Takes a hosted link (/d/, a stable link /l/, or an organisation embed link /o/), the text of a Plotwork SVG a site serves, or both, and answers with the line that installs @plotwork.official/viewer and an HTML or React snippet that shows the picture. live is kept for a stable or organisation embed link, and pin adds the SHA-256 fingerprint of the SVG text; a choice that cannot apply is left out and said in notes. A link that is not a hosted picture is a 200 answer with ok false and a hint. Nothing is fetched or laid out.",
+        "security": [
+          {
+            "ApiKey": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmbedDiagramInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The snippet, the install line, the fingerprint and the notes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmbedDiagramResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The body failed schema validation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The API key is missing or not valid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The account is on the Free plan, which does not include the REST drawing and checking routes (plan.rest_not_included).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The body is larger than the size cap.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/diagrams/outline": {
       "post": {
         "tags": [
@@ -1264,6 +1353,207 @@
         }
       }
     },
+    "/v1/library": {
+      "get": {
+        "tags": [
+          "Hosting"
+        ],
+        "summary": "List the diagrams a key or an app's token can see.",
+        "description": "A page of diagrams, newest first: a person's own hosted diagrams, or an organisation's library under its folder rules and approval holds, as the person would see it. No diagram source is answered. An app's token needs library:read. Open to every plan.",
+        "security": [
+          {
+            "ApiKey": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50,
+              "description": "Diagrams a page, 1 to 100. 50 when left out."
+            },
+            "required": false,
+            "description": "Diagrams a page, 1 to 100. 50 when left out.",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "maxLength": 200,
+              "description": "The nextCursor of the page before."
+            },
+            "required": false,
+            "description": "The nextCursor of the page before.",
+            "name": "cursor",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "description": "Keep to this folder and everything inside it, such as Payments/Checkout."
+            },
+            "required": false,
+            "description": "Keep to this folder and everything inside it, such as Payments/Checkout.",
+            "name": "folder",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of the library.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LibraryPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The query is not valid, or the cursor is not one this API gave.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No key, or the key or token is not valid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token's grant does not hold library:read (oauth.insufficient_scope).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The organisation of the key is gone, or the member left it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests, or the daily limit is used up.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/library/{id}.svg": {
+      "get": {
+        "tags": [
+          "Hosting"
+        ],
+        "summary": "Read one picture of the library.",
+        "description": "The SVG of a diagram the caller can see, private ones included, with a strong ETag; If-None-Match answers 304. Cache-Control is private, no-cache. An app's token needs library:read.",
+        "security": [
+          {
+            "ApiKey": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The SVG.",
+            "content": {
+              "image/svg+xml": {
+                "schema": {
+                  "type": "string",
+                  "description": "The SVG document."
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "The picture has not changed."
+          },
+          "401": {
+            "description": "No key, or the key or token is not valid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token's grant does not hold library:read (oauth.insufficient_scope).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such diagram the caller can see.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests, or the daily limit is used up.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/markdown/plan": {
       "post": {
         "tags": [
@@ -1431,6 +1721,65 @@
           },
           "429": {
             "description": "Too many requests.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/me": {
+      "get": {
+        "tags": [
+          "Keys"
+        ],
+        "summary": "Read who a key or an app's token acts as.",
+        "description": "The account id and name, and the organisation the key or the grant is for. An app's token needs profile, and gets the address only with email. Open to every plan.",
+        "security": [
+          {
+            "ApiKey": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Who the call acts as.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Me"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No key, or the key or token is not valid (oauth.invalid_token for a token).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token's grant does not hold profile (oauth.insufficient_scope).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests, or the daily limit is used up.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4211,6 +4560,141 @@
         ],
         "description": "The edited source, a result for each operation, and the check of the result."
       },
+      "EmbedDiagramInput": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "A hosted picture (/d/), stable link (/l/) or organisation embed link (/o/) on cdn.plotwork.dev. Never fetched."
+          },
+          "svg": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000000,
+            "description": "The text of a Plotwork SVG; needed to pin."
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500,
+            "description": "Where the page serves svg from, when there is no url."
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "html",
+              "react"
+            ],
+            "default": "html",
+            "description": "html for any page, react for React."
+          },
+          "live": {
+            "type": "boolean",
+            "default": false,
+            "description": "Follow new versions: /l/ and /o/ links only."
+          },
+          "pin": {
+            "type": "boolean",
+            "default": false,
+            "description": "Show only exactly this picture: needs svg."
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "What the diagram shows, for a screen reader."
+          }
+        },
+        "description": "A Plotwork picture to show with the viewer, and how."
+      },
+      "EmbedDiagramResponse": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "description": "False when the url is not a hosted picture or the svg is not an SVG; message and hint say why."
+          },
+          "snippet": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The code to paste into the page or component, or null when ok is false."
+          },
+          "install": {
+            "type": "string",
+            "description": "The command that installs the viewer."
+          },
+          "src": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The address the snippet loads the picture from."
+          },
+          "linkKind": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "picture",
+              "stable",
+              "organisation",
+              null
+            ],
+            "description": "picture (/d/), stable (/l/), organisation (/o/), or null for a file the page serves."
+          },
+          "fingerprint": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "sha256-<hex> of the svg text, whether or not the snippet pins it; null without svg."
+          },
+          "live": {
+            "type": "boolean",
+            "description": "True when the snippet carries live."
+          },
+          "pinned": {
+            "type": "boolean",
+            "description": "True when the snippet carries fingerprint."
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Each choice left out and why, and what to know about the link."
+          },
+          "message": {
+            "type": "string",
+            "description": "What happened, in one sentence."
+          },
+          "hint": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "What to send instead, when ok is false."
+          }
+        },
+        "required": [
+          "ok",
+          "snippet",
+          "install",
+          "src",
+          "linkKind",
+          "fingerprint",
+          "live",
+          "pinned",
+          "notes",
+          "message",
+          "hint"
+        ],
+        "description": "A snippet that shows a Plotwork picture with the viewer."
+      },
       "ErrorResponse": {
         "type": "object",
         "properties": {
@@ -5436,6 +5920,83 @@
         ],
         "description": "The result of turning a file of another format into Plotwork source."
       },
+      "LibraryPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "name": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "folder": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "scheme": {
+                  "type": "string",
+                  "enum": [
+                    "light",
+                    "dark",
+                    "auto"
+                  ],
+                  "description": "The color scheme it was drawn in: light, dark, or auto."
+                },
+                "bytes": {
+                  "type": "integer"
+                },
+                "updatedAt": {
+                  "type": "integer",
+                  "description": "When it was last published, in milliseconds since the epoch."
+                },
+                "classification": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "enum": [
+                    "public",
+                    "internal",
+                    "confidential",
+                    null
+                  ],
+                  "description": "Its label in an organisation's library, or null for a person's own diagram."
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "folder",
+                "scheme",
+                "bytes",
+                "updatedAt",
+                "classification"
+              ]
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
+        ]
+      },
       "MapIconsInput": {
         "type": "object",
         "properties": {
@@ -5596,6 +6157,54 @@
           "gapCount"
         ],
         "description": "An icon, or candidates, for each name sent, and the names that found no icon."
+      },
+      "Me": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "email": {
+            "type": "string",
+            "description": "The account's address: for a key always, for an app only with the email scope."
+          },
+          "organisation": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "slug": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "slug",
+              "name"
+            ],
+            "description": "The organisation the key or the grant is for, or null."
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "organisation"
+        ]
       },
       "Note": {
         "type": "object",

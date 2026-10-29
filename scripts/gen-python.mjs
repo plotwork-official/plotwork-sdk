@@ -12,7 +12,7 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-import { isIdempotent, jsonSchema, placeOf } from './operations.mjs'
+import { isIdempotent, isJsonOperation, jsonSchema, placeOf } from './operations.mjs'
 
 const ROOT = join(import.meta.dirname, '..')
 const SPEC = JSON.parse(readFileSync(join(ROOT, 'spec', 'openapi.json'), 'utf8'))
@@ -172,6 +172,7 @@ const tree = {}
 const operations = []
 for (const [path, item] of Object.entries(SPEC.paths)) {
   for (const [method, operation] of Object.entries(item)) {
+    if (!isJsonOperation(operation)) continue
     const place = placeOf(method, path).map(snake)
     const body = jsonSchema(operation.requestBody?.content)
     const methodHint = pascal(place.join('_'))

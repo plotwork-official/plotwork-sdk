@@ -729,6 +729,52 @@ class EditDiagramResponse(TypedDict):
     next: str
 
 
+class EmbedDiagramInput(TypedDict):
+    """A Plotwork picture to show with the viewer, and how."""
+
+    #: A hosted picture (/d/), stable link (/l/) or organisation embed link (/o/) on cdn.plotwork.dev. Never fetched.
+    url: NotRequired[str]
+    #: The text of a Plotwork SVG; needed to pin.
+    svg: NotRequired[str]
+    #: Where the page serves svg from, when there is no url.
+    path: NotRequired[str]
+    #: html for any page, react for React.
+    format: NotRequired[Literal["html", "react"]]
+    #: Follow new versions: /l/ and /o/ links only.
+    live: NotRequired[bool]
+    #: Show only exactly this picture: needs svg.
+    pin: NotRequired[bool]
+    #: What the diagram shows, for a screen reader.
+    label: NotRequired[str]
+
+
+class EmbedDiagramResponse(TypedDict):
+    """A snippet that shows a Plotwork picture with the viewer."""
+
+    #: False when the url is not a hosted picture or the svg is not an SVG; message and hint say why.
+    ok: bool
+    #: The code to paste into the page or component, or null when ok is false.
+    snippet: Optional[str]
+    #: The command that installs the viewer.
+    install: str
+    #: The address the snippet loads the picture from.
+    src: Optional[str]
+    #: picture (/d/), stable (/l/), organisation (/o/), or null for a file the page serves.
+    linkKind: Literal["picture", "stable", "organisation", None]
+    #: sha256-<hex> of the svg text, whether or not the snippet pins it; null without svg.
+    fingerprint: Optional[str]
+    #: True when the snippet carries live.
+    live: bool
+    #: True when the snippet carries fingerprint.
+    pinned: bool
+    #: Each choice left out and why, and what to know about the link.
+    notes: List[str]
+    #: What happened, in one sentence.
+    message: str
+    #: What to send instead, when ok is false.
+    hint: Optional[str]
+
+
 class ErrorResponse(TypedDict):
     """Standard error envelope used by every failing response."""
 
@@ -1142,6 +1188,24 @@ class ImportSourceResponse(TypedDict):
     next: str
 
 
+class LibraryPageItemsItem(TypedDict):
+    id: str
+    name: Optional[str]
+    folder: Optional[str]
+    #: The color scheme it was drawn in: light, dark, or auto.
+    scheme: Literal["light", "dark", "auto"]
+    bytes: int
+    #: When it was last published, in milliseconds since the epoch.
+    updatedAt: int
+    #: Its label in an organisation's library, or null for a person's own diagram.
+    classification: Literal["public", "internal", "confidential", None]
+
+
+class LibraryPage(TypedDict):
+    items: List[LibraryPageItemsItem]
+    nextCursor: Optional[str]
+
+
 class MapIconsInput(TypedDict):
     """Names to find icons for, and an optional provider to look in first."""
 
@@ -1190,6 +1254,23 @@ class MapIconsResponse(TypedDict):
     ambiguousCount: int
     #: How many names matched nothing.
     gapCount: int
+
+
+class MeOrganisationObject(TypedDict):
+    """The organisation the key or the grant is for, or null."""
+
+    id: str
+    slug: str
+    name: str
+
+
+class Me(TypedDict):
+    id: str
+    name: Optional[str]
+    #: The account's address: for a key always, for an app only with the email scope.
+    email: NotRequired[str]
+    #: The organisation the key or the grant is for, or null.
+    organisation: Optional[MeOrganisationObject]
 
 
 class Note(TypedDict):
@@ -2079,6 +2160,10 @@ class DiagramsOperations:
         """Change diagram source with small typed operations. ``POST /v1/diagrams/edit``"""
         return cast("EditDiagramResponse", self._transport.request("POST", "/v1/diagrams/edit", idempotent=True, body=body))
 
+    def embed(self, **body: Unpack[EmbedDiagramInput]) -> EmbedDiagramResponse:
+        """Write a snippet that shows a picture with the viewer. ``POST /v1/diagrams/embed``"""
+        return cast("EmbedDiagramResponse", self._transport.request("POST", "/v1/diagrams/embed", idempotent=True, body=body))
+
     def outline(self, **body: Unpack[DiagramSourceInput]) -> OutlineResponse:
         """Describe diagram source as text. ``POST /v1/diagrams/outline``"""
         return cast("OutlineResponse", self._transport.request("POST", "/v1/diagrams/outline", idempotent=True, body=body))
@@ -2117,6 +2202,17 @@ class IconsOperations:
     def map(self, **body: Unpack[MapIconsInput]) -> MapIconsResponse:
         """Choose icons for many names at once. ``POST /v1/icons/map``"""
         return cast("MapIconsResponse", self._transport.request("POST", "/v1/icons/map", idempotent=True, body=body))
+
+
+class LibraryOperations:
+    """The ``library`` operations."""
+
+    def __init__(self, transport: Transport) -> None:
+        self._transport = transport
+
+    def list(self, *, limit: Optional[int] = None, cursor: Optional[str] = None, folder: Optional[str] = None) -> LibraryPage:
+        """List the diagrams a key or an app's token can see. ``GET /v1/library``"""
+        return cast("LibraryPage", self._transport.request("GET", "/v1/library", idempotent=True, query={"limit": limit, "cursor": cursor, "folder": folder}))
 
 
 class MarkdownOperations:
@@ -2164,12 +2260,17 @@ class Operations:
         self._transport = transport
         self.diagrams = DiagramsOperations(transport)
         self.icons = IconsOperations(transport)
+        self.library = LibraryOperations(transport)
         self.markdown = MarkdownOperations(transport)
         self.patterns = PatternsOperations(transport)
 
     def import_source(self, **body: Unpack[ImportSourceInput]) -> ImportSourceResponse:
         """Turn a file of another format into a diagram. ``POST /v1/import``"""
         return cast("ImportSourceResponse", self._transport.request("POST", "/v1/import", idempotent=True, body=body))
+
+    def me(self) -> Me:
+        """Read who a key or an app's token acts as. ``GET /v1/me``"""
+        return cast("Me", self._transport.request("GET", "/v1/me", idempotent=True))
 
     def vocabulary(self, *, kind: Optional[Literal["flow", "sequence", "schema", "git", "gantt", "class", "state", "timeline", "journey", "mindmap", "treemap", "pie", "quadrant", "layers", "c4", "matrix", "sankey", "xychart", "tree", "swimlane", "requirement", "block", "packet", "kanban", "radar", "usecase", "venn", "fishbone", "wardley"]] = None, topic: Optional[Literal["import-formats", "icon-words"]] = None) -> SyntaxResponse:
         """Get the diagram language reference. ``GET /v1/vocabulary``"""
@@ -2182,6 +2283,7 @@ OPERATION_PATHS = (
     "POST /v1/diagrams/convert-mermaid",
     "POST /v1/diagrams/draw",
     "POST /v1/diagrams/edit",
+    "POST /v1/diagrams/embed",
     "POST /v1/diagrams/outline",
     "POST /v1/diagrams/publish",
     "POST /v1/diagrams/read",
@@ -2191,8 +2293,10 @@ OPERATION_PATHS = (
     "GET /v1/icons",
     "POST /v1/icons/map",
     "POST /v1/import",
+    "GET /v1/library",
     "POST /v1/markdown/plan",
     "POST /v1/markdown/sync",
+    "GET /v1/me",
     "POST /v1/patterns/check",
     "POST /v1/patterns/draw",
     "POST /v1/patterns/find",
