@@ -3,13 +3,13 @@ name: Publish
 # Publishes one package to npm under @plotwork.official with trusted publishing: npm trusts this workflow in this repository through
 # GitHub's OIDC token, so no npm token exists anywhere, and every version carries a provenance statement that names this commit.
 #
-# Push a tag `<package folder>-v<version>`, such as `viewer-v0.1.0`. The version must equal the package's package.json, or nothing
+# Push a tag `<package folder>-v<version>`, such as `viewer-v0.1.0`. A `python-v...` tag is `publish-python.yml`'s, not this one's. The version must equal the package's package.json, or nothing
 # is published. On npm, each package's trusted publisher names: organisation `plotwork-official`, repository `plotwork-sdk`,
 # workflow `publish.yml`, environment `npm`.
 
 on:
   push:
-    tags: ['*-v*']
+    tags: ['*-v*', '!python-v*']
 
 permissions:
   contents: read
