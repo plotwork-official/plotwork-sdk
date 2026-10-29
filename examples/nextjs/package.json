@@ -1,0 +1,29 @@
+{
+  "name": "plotwork-example-nextjs",
+  "private": true,
+  "description": "A Next.js app that draws Plotwork diagrams on its server with @plotwork.official/sdk and shows them with @plotwork.official/viewer.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=20.9"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@plotwork.official/sdk": "0.1.1",
+    "@plotwork.official/viewer": "0.1.4",
+    "next": "16.4.2",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.4",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "typescript": "6.0.3"
+  }
+}

@@ -17,7 +17,8 @@
     "film": "pnpm build && node scripts/film.mjs",
     "gen:sdk": "node scripts/gen-sdk.mjs",
     "gen:python": "node scripts/gen-python.mjs",
-    "sync:openapi": "node scripts/sync-openapi.mjs"
+    "sync:openapi": "node scripts/sync-openapi.mjs",
+    "shots:examples": "node scripts/example-shots.mjs"
   },
   "devDependencies": {
     "@types/node": "22.20.4",

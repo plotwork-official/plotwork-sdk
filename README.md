@@ -33,7 +33,7 @@
   <a href="./packages/sdk/README.md">API client</a> &nbsp;·&nbsp;
   <a href="./python/README.md">Python</a> &nbsp;·&nbsp;
   <a href="./spec/picture.md">Picture contract</a> &nbsp;·&nbsp;
-  <a href="./examples/vanilla/index.html">Example</a>
+  <a href="./examples/README.md">Examples</a>
 </p>
 
 <p align="center">
@@ -192,6 +192,37 @@ checked = plotwork.diagrams.validate(source=source)
 
 The viewer renders as the bare element on a server and comes alive in the browser. Every attribute, method, event and style hook is in the [viewer reference](./packages/viewer/README.md).
 
+## Examples
+
+Apps to clone, add your API key to, and run. Each installs the packages from npm as your project would, and CI builds each against every change.
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <a href="./examples/nextjs/README.md">
+        <picture>
+          <source media="(prefers-color-scheme: dark)" srcset="./docs/assets/examples/nextjs-dark.png">
+          <img alt="The Next.js example: diagram source beside the picture the API drew" src="./docs/assets/examples/nextjs-light.png">
+        </picture>
+      </a><br>
+      <b><a href="./examples/nextjs/README.md">Next.js</a></b><br>
+      A route handler checks and draws with the API client on the server; the key never reaches the browser.
+    </td>
+    <td width="50%" valign="top">
+      <a href="./examples/react-vite/README.md">
+        <picture>
+          <source media="(prefers-color-scheme: dark)" srcset="./docs/assets/examples/react-vite-dark.png">
+          <img alt="The React and Vite example: a bundled diagram above a playground" src="./docs/assets/examples/react-vite-light.png">
+        </picture>
+      </a><br>
+      <b><a href="./examples/react-vite/README.md">React and Vite</a></b><br>
+      A <code>.diagram</code> file bundled at build time with drill and trace events, and a playground through the dev server.
+    </td>
+  </tr>
+</table>
+
+The [vanilla page](./examples/vanilla/index.html) shows the element with no framework. All three are listed in [`examples/`](./examples/README.md).
+
 ## Where the pictures come from
 
 <p align="center">
@@ -266,6 +297,7 @@ pnpm check
 | [Vite plugin](./packages/vite/README.md) | Importing `.diagram` files, options, hot reload |
 | [API client](./packages/sdk/README.md) | Every `/v1` call, errors, retries |
 | [Python client](./python/README.md) | The same calls from Python |
+| [Examples](./examples/README.md) | Next.js, React and Vite, and a plain page |
 | [Picture contract](./spec/picture.md) | What every SDK reads from a picture |
 | [Plotwork docs](https://docs.plotwork.dev) | Writing diagrams, the command line, the MCP server, organisations |
 

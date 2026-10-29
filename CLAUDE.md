@@ -15,7 +15,7 @@ The Plotwork SDK: packages that show and use Plotwork diagrams in other people's
 | `packages/vite/` | `@plotwork.official/vite`: `.diagram` imports drawn by the project's own Plotwork command line at build time. |
 | `packages/sdk/` | `@plotwork.official/sdk`: the `/v1` API client; `src/generated.ts` is written by `pnpm gen:sdk` from `spec/openapi.json`. |
 | `python/` | `plotwork` on PyPI: the `/v1` API client for Python, standard library only; `src/plotwork/_generated.py` is written by `pnpm gen:python` from `spec/openapi.json`. `smoke.py` runs the installed package against a real deployment. |
-| `examples/` | Pages that use the packages as a reader would. |
+| `examples/` | Apps that use the packages as a reader would: `vanilla` (a page on the built `dist`), `react-vite` and `nextjs` (installed from npm with their own lockfiles, not workspace packages; the key lives in `.env.local` and is read on a server only). CI builds each against the packed packages; `pnpm shots:examples` draws their screenshots. |
 | `scripts/` | Repository checks. Not shipped. |
 
 ## Commands
@@ -28,6 +28,7 @@ The Plotwork SDK: packages that show and use Plotwork diagrams in other people's
 | `pnpm gen:sdk` | Writes `packages/sdk/src/generated.ts` from `spec/openapi.json`; `pnpm check` fails when it is stale. |
 | `pnpm gen:python` | Writes `python/src/plotwork/_generated.py` from the same spec, placing operations as `gen:sdk` does (`scripts/operations.mjs`); `pnpm check` fails when it is stale. Test the package with `python -m pytest` in `python/`. |
 | `pnpm shots` | Builds, then draws the README's screenshots of the viewer from the vanilla example in Chromium, light and dark (`scripts/shots.mjs`). Run after any change to how the viewer looks. |
+| `pnpm shots:examples` | Installs and builds `examples/react-vite` and `examples/nextjs` in temporary folders from npm, serves each build, and writes `docs/assets/examples/<name>-light.png` and `-dark.png` (`scripts/example-shots.mjs`). Set `PLOTWORK_API_KEY` to draw the playgrounds. |
 | `pnpm film` | Builds, then records `docs/film/` frame by frame in light and dark into `docs/film/out/` (MP4 and the README webp). Copy them to `plotwork-assets/public/media/films/sdk/` and push that repository to publish. Needs ffmpeg. |
 
 ## Rules that are easy to get wrong

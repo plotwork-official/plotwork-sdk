@@ -1,0 +1,31 @@
+{
+  "name": "plotwork-example-react-vite",
+  "private": true,
+  "description": "A React app built with Vite that imports a .diagram file through @plotwork.official/vite and draws more through @plotwork.official/sdk.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@plotwork.official/sdk": "0.1.1",
+    "@plotwork.official/viewer": "0.1.4",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@buun_group/plotwork": "0.8.0",
+    "@plotwork.official/vite": "0.1.1",
+    "@types/node": "22.20.4",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "typescript": "6.0.3",
+    "vite": "6.4.3"
+  }
+}

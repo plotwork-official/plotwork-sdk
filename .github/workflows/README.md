@@ -13,7 +13,7 @@ Workflows here follow:
 
 | Path | Purpose |
 |---|---|
-| `ci.yml` | On a pull request and a push to `main`: install, audit, `pnpm check`, build, and pack every package; and, on Python 3.10 and 3.13, test, type check and build the Python package, failing if its wheel declares a `Requires-Dist`. |
+| `ci.yml` | On a pull request and a push to `main`: install, audit, `pnpm check`, build, and pack every package; for each app in `examples/`, install it from its lockfile with the packed packages swapped in, type check and build it; and, on Python 3.10 and 3.13, test, type check and build the Python package, failing if its wheel declares a `Requires-Dist`. |
 | `publish.yml` | On a tag `<package folder>-v<version>` (`viewer-v0.1.0`): checks the tag against the package's version, runs `pnpm check`, builds, and publishes with OIDC. A version with a `-` (`0.2.0-beta.1`) goes to the `next` dist-tag, any other to `latest`. Tags `python-v*` are left to `publish-python.yml`. |
 | `publish-python.yml` | On a tag `python-v<version>` (`python-v0.1.0`): checks the tag against `python/pyproject.toml` and `_version.py`, tests, type checks and builds on Python 3.12, then a second job in the environment `pypi` publishes the built files with OIDC and PEP 740 attestations. |
 
