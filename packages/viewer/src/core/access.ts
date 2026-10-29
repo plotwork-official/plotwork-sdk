@@ -9,6 +9,12 @@ export type TokenSource = string | (() => string | Promise<string>)
 /** A `fetch`-like function: the page's own, to add headers, go through a proxy, or stand in for a test. */
 export type Fetcher = (input: string, init: RequestInit) => Promise<Response>
 
+/** How a request is made: the page's `fetch` and token, when it set them. */
+export interface Access {
+  fetch?: Fetcher | null | undefined
+  token?: TokenSource | null | undefined
+}
+
 /**
  * True when a token may go to this address: https, or http on this computer (`localhost`, `127.0.0.1`, `[::1]`) for development. A
  * token is never sent over plain http to another host.

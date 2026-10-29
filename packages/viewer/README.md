@@ -17,7 +17,7 @@
   <a href="https://github.com/plotwork-official/plotwork-sdk/blob/main/LICENSE"><img alt="MIT licence" src="https://img.shields.io/badge/licence-MIT-52514e"></a>
 </p>
 
-Embed interactive Plotwork diagrams in any page: pan and zoom, trace a box's lines, drill from an overview box into its part, light and dark, and live updates when a new version is published. A web component, `<plotwork-diagram>`, and a React component, `<PlotworkDiagram>`.
+Embed interactive Plotwork diagrams in any page: pan and zoom, trace a box's lines, drill from an overview box into its part, light and dark, and live updates when a new version is published. A web component, `<plotwork-diagram>`, and a React component, `<PlotworkDiagram>`. For an app whose people sign in with Plotwork, `<plotwork-library>` lists their diagrams to pick one from.
 
 <p align="center">
   <img alt="The viewer added to an app: npm install, a PlotworkDiagram in App.tsx, then the real component tracing a box, sending a drill event, and showing a new version live" src="https://assets.plotwork.dev/media/films/sdk/readme-light.webp" width="760">
@@ -35,6 +35,7 @@ Embed interactive Plotwork diagrams in any page: pan and zoom, trace a box's lin
 | Can a picture run script in my page? | No. It is shown as an `img`, and the element builds its own nodes without HTML text. |
 | Live updates? | `live` checks the address every 60 seconds while the page is in view and swaps in a new version. |
 | Pinning? | `fingerprint="sha256-..."` shows the picture only when it is exactly that one. |
+| A picker? | `<plotwork-library>` (`/library`): the signed-in person's diagrams, searchable, by keyboard too. |
 
 ## Install
 
@@ -134,6 +135,53 @@ diagram.setAttribute('src', `https://api.plotwork.dev/v1/library/${id}.svg`)
 | Never an API key | A key in a page is a key anyone can copy. A token is the person's own and ends within an hour. |
 | A token set after a `signed-out` error loads again | So a page can show the element first and sign in after. |
 
+## Pick from the library
+
+`<plotwork-library>` lists the diagrams the signed-in person can see, newest first, a hundred a page, with a search box that filters by name and folder. It needs a token with `library:read`. Choosing one sends `plotwork-select` with `{ id, name, pictureUrl }`; hand `pictureUrl` to `<plotwork-diagram>` with the same token.
+
+```tsx
+import { PlotworkDiagram, PlotworkLibrary } from '@plotwork.official/viewer/react'
+import { useState } from 'react'
+
+export function Picker({ token }: { token: () => Promise<string> }) {
+  const [picture, setPicture] = useState<string | null>(null)
+  return (
+    <>
+      <PlotworkLibrary token={token} onSelect={({ pictureUrl }) => setPicture(pictureUrl)} />
+      {picture !== null && <PlotworkDiagram src={picture} token={token} live />}
+    </>
+  )
+}
+```
+
+```html
+<script type="module">
+  import '@plotwork.official/viewer/library/register'
+  const library = document.querySelector('plotwork-library')
+  library.token = () => session.accessToken
+  library.addEventListener('plotwork-select', (event) => openDiagram(event.detail.pictureUrl))
+</script>
+
+<plotwork-library label="Diagrams to insert"></plotwork-library>
+```
+
+| Attribute | Values | Default |
+|---|---|---|
+| `base-url` | The API's address | `https://api.plotwork.dev` |
+| `folder` | Keep to a folder and everything in it, such as `Payments/Checkout` | the whole library |
+| `label` | The list's name, for a screen reader | `Your Plotwork diagrams` |
+| `theme` | `auto`, `light`, `dark` | `auto`: follows the page |
+
+| Name | What it does |
+|---|---|
+| `token`, `fetch`, `labels` | As for `<plotwork-diagram>`. Without a token or a `fetch` it asks the person to sign in and sends no request. |
+| `items`, `selected` | The diagrams loaded, and the id chosen last. |
+| `reload()` | Reads the library again from its first page. |
+| `plotwork-select` | `{ id, name, pictureUrl }` |
+| `plotwork-error` | `{ reason }`: `signed-out` (no token, or a 401), `forbidden` (the grant lacks `library:read`), `network`, or `address`. |
+
+The search box's down arrow moves into the list; the arrows, Home and End move in it, Enter or Space chooses, and Escape or typing goes back to the search. Style it through `--plotwork-paper`, `--plotwork-ink`, `--plotwork-accent`, `--plotwork-control`, `--plotwork-radius`, `--plotwork-font` and `--plotwork-height`, and the parts `stage`, `search`, `list`, `option`, `badge`, `notice` and `button`.
+
 ## Theming
 
 Set custom properties on the element: `--plotwork-height`, `--plotwork-paper`, `--plotwork-ink`, `--plotwork-trace`, `--plotwork-radius`, `--plotwork-font`. Style the parts with `::part(stage)`, `::part(canvas)`, `::part(toolbar)`, `::part(button)` and `::part(notice)`.
@@ -152,3 +200,5 @@ Set custom properties on the element: `--plotwork-height`, `--plotwork-paper`, `
 | [Picture contract](https://github.com/plotwork-official/plotwork-sdk/blob/main/spec/picture.md) | What the viewer reads from a picture |
 | [Core](https://github.com/plotwork-official/plotwork-sdk/blob/main/packages/viewer/src/core/README.md) | The parts that need no element |
 | [Element](https://github.com/plotwork-official/plotwork-sdk/blob/main/packages/viewer/src/element/README.md) | How `<plotwork-diagram>` is built |
+| [Library](https://github.com/plotwork-official/plotwork-sdk/blob/main/packages/viewer/src/library/README.md) | How `<plotwork-library>` is built |
+| [API client](https://www.npmjs.com/package/@plotwork.official/sdk#sign-in-with-plotwork) | Sign in with Plotwork, to get the token |

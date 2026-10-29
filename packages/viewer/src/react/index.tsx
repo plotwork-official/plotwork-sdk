@@ -114,3 +114,5 @@ export const PlotworkDiagram = forwardRef(PlotworkDiagramInner)
 PlotworkDiagram.displayName = 'PlotworkDiagram'
 
 export type { PlotworkDiagramElement } from '../element/plotwork-diagram.js'
+export { PlotworkLibrary } from './library.js'
+export type { LibraryErrorDetail, PlotworkLibraryElement, PlotworkLibraryProps, SelectDetail } from './library.js'

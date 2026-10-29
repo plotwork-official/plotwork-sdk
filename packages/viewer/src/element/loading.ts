@@ -1,5 +1,5 @@
 import { bearerHeaders, mayCarryToken } from '../core/access.js'
-import type { Fetcher, TokenSource } from '../core/access.js'
+import type { Access } from '../core/access.js'
 import { fingerprintOf, isFingerprint } from '../core/fingerprint.js'
 import { parsePicture, traceMapOf } from '../core/picture-map.js'
 import type { TraceMap } from '../core/picture-map.js'
@@ -9,12 +9,6 @@ import { loadPicture, pictureUrl, PictureLoadError } from '../core/picture-loade
  * Getting a picture's text and reading it, for the element. A mistake is a `PictureLoadError` with its reason, which the element
  * turns into its notice and `plotwork-error`.
  */
-
-/** How the element asks: the page's `fetch` and token, when it set them. */
-export interface Access {
-  fetch?: Fetcher | null | undefined
-  token?: TokenSource | null | undefined
-}
 
 /**
  * The text at `src`, resolved against the page; null when there is no `src`. With a token, the address must be https (or http on

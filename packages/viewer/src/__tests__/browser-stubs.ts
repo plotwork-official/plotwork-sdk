@@ -28,7 +28,10 @@ export function installBrowserStubs(): void {
   Object.defineProperty(HTMLElement.prototype, 'clientHeight', { configurable: true, get: () => CANVAS_SIZE.height })
 }
 
-/** Waits for the element's async work (a fingerprint, a fetch) to finish. */
+/**
+ * Waits for the element's async work (a fingerprint, a fetch) to finish. A Web Crypto digest runs off the main thread, so under a
+ * busy machine it can take more than a few turns: twenty turns and a few milliseconds leave it room.
+ */
 export async function settle(): Promise<void> {
-  for (let round = 0; round < 5; round += 1) await new Promise((resolve) => setTimeout(resolve, 0))
+  for (let round = 0; round < 20; round += 1) await new Promise((resolve) => setTimeout(resolve, round % 5 === 4 ? 2 : 0))
 }

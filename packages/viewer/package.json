@@ -1,6 +1,6 @@
 {
   "name": "@plotwork.official/viewer",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "Embed interactive Plotwork diagrams in any page: a <plotwork-diagram> web component and a React component, with no runtime dependencies.",
   "license": "MIT",
   "type": "module",
@@ -16,7 +16,8 @@
     "viewer",
     "web-component",
     "react",
-    "svg"
+    "svg",
+    "oauth"
   ],
   "exports": {
     ".": {
@@ -35,6 +36,14 @@
       "types": "./dist/core/index.d.ts",
       "default": "./dist/core/index.js"
     },
+    "./library": {
+      "types": "./dist/library/index.d.ts",
+      "default": "./dist/library/index.js"
+    },
+    "./library/register": {
+      "types": "./dist/library/register.d.ts",
+      "default": "./dist/library/register.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -44,7 +53,8 @@
     "LICENSE"
   ],
   "sideEffects": [
-    "./dist/register.js"
+    "./dist/register.js",
+    "./dist/library/register.js"
   ],
   "engines": {
     "node": ">=20"
