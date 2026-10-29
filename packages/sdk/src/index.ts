@@ -18,8 +18,6 @@ export const DEFAULT_BASE_URL = 'https://api.plotwork.dev'
 export interface PlotworkOptions {
   /** An account or organisation API key, sent as `X-API-Key`. Keep it in an environment variable or a secret store. */
   apiKey?: string | undefined
-  /** An OAuth access token, sent as `Authorization: Bearer`, in place of a key. */
-  accessToken?: string | undefined
   /** The API's address: production by default, `https://api-preview.plotwork.dev` for preview, or a self-hosted engine. */
   baseUrl?: string | undefined
   /** The `fetch` to call; the global one when left out. */
@@ -36,7 +34,6 @@ export class Plotwork {
   constructor(options: PlotworkOptions = {}) {
     const headers: Record<string, string> = {}
     if (options.apiKey !== undefined && options.apiKey !== '') headers['X-API-Key'] = options.apiKey
-    if (options.accessToken !== undefined && options.accessToken !== '') headers.Authorization = `Bearer ${options.accessToken}`
     const transport: Transport = {
       baseUrl: options.baseUrl ?? DEFAULT_BASE_URL,
       headers,

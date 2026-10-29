@@ -1,6 +1,6 @@
 {
   "name": "@plotwork.official/sdk",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "The Plotwork API from TypeScript: every /v1 operation typed from the OpenAPI document, on fetch alone, with no runtime dependencies.",
   "license": "MIT",
   "type": "module",

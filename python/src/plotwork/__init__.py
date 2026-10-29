@@ -30,7 +30,6 @@ class Plotwork(Operations):
     """The Plotwork API client.
 
     :param api_key: An account or organisation API key, sent as ``X-API-Key``. Keep it in an environment variable or a secret store.
-    :param access_token: An OAuth access token, sent as ``Authorization: Bearer``, in place of a key.
     :param base_url: The API's address: production by default, ``https://api-preview.plotwork.dev`` for preview, or a self-hosted engine.
     :param timeout: Seconds before a call counts as failed: 60 by default.
     :param max_retries: How many times a safe call is tried again on 429 or 503: 2 by default, 0 to never retry.
@@ -42,7 +41,6 @@ class Plotwork(Operations):
         self,
         *,
         api_key: Optional[str] = None,
-        access_token: Optional[str] = None,
         base_url: Optional[str] = None,
         timeout: float = 60.0,
         max_retries: int = 2,
@@ -52,11 +50,8 @@ class Plotwork(Operations):
         headers: Dict[str, str] = {}
         if api_key:
             headers["X-API-Key"] = api_key
-        if access_token:
-            headers["Authorization"] = f"Bearer {access_token}"
         self._options: Dict[str, Any] = {
             "api_key": api_key,
-            "access_token": access_token,
             "base_url": base_url,
             "timeout": timeout,
             "max_retries": max_retries,

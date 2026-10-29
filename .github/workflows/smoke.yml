@@ -64,7 +64,15 @@ jobs:
           PLOTWORK_API_KEY: ${{ secrets.PLOTWORK_API_KEY }}
           VERSION: ${{ inputs.version || 'latest' }}
           ENVIRONMENT: ${{ matrix.environment }}
-        run: node smoke/run.mjs --env "$ENVIRONMENT" --version "$VERSION"
+        run: node smoke/run.mjs --env "$ENVIRONMENT" --version "$VERSION" --shots smoke-shots
+      - name: Keep the screenshots as evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: smoke-shots-${{ matrix.environment }}
+          path: smoke-shots/
+          if-no-files-found: ignore
+          retention-days: 30
 
   pypi:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'

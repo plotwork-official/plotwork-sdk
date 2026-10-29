@@ -41,12 +41,12 @@ def test_sends_camel_case_keys_as_the_api_names_them(api: FakeApi) -> None:
     assert api.seen[0].json() == {"source": SOURCE, "embedSource": True, "idPrefix": "a"}
 
 
-def test_puts_a_get_input_in_the_query_and_uses_a_bearer_token(api: FakeApi) -> None:
+def test_puts_a_get_input_in_the_query_and_sends_no_key_when_there_is_none(api: FakeApi) -> None:
     api.answer(Answer(body={"results": []}))
-    client(api, [], access_token="tok").icons.search(q="token exchange", limit=5)
+    client(api, []).icons.search(q="token exchange", limit=5)
     seen = api.seen[0]
     assert (seen.method, seen.path) == ("GET", "/v1/icons?q=token+exchange&limit=5")
-    assert seen.headers["authorization"] == "Bearer tok"
+    assert "authorization" not in seen.headers
     assert "x-api-key" not in seen.headers
     assert "content-type" not in seen.headers
     assert seen.body is None

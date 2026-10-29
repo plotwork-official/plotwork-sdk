@@ -24,7 +24,7 @@ The hosted Plotwork API from TypeScript. Every `/v1` operation (validate, draw, 
 |---|---|
 | What does it install? | Nothing else. |
 | Where do the types come from? | The API's OpenAPI document, kept in this repository as [`spec/openapi.json`](https://github.com/plotwork-official/plotwork-sdk/blob/main/spec/openapi.json). |
-| How do I sign in? | An API key from the Plotwork portal (`apiKey`), or an OAuth access token (`accessToken`). |
+| How do I sign in? | An API key from the Plotwork portal (`apiKey`), sent as `X-API-Key`. Call the API from a server, never from a browser, so the key stays private. |
 | Does a mistake in a diagram throw? | No. It is part of the answer, with a line, a column and a hint. Only a failed request throws, as `PlotworkApiError` with a stable `errorCode`. |
 | Does it retry? | A safe call is retried twice on 429 and 503, after the API's `Retry-After`. Publishing is never retried. |
 
@@ -83,7 +83,6 @@ try {
 | Option | Default |
 |---|---|
 | `apiKey` | none |
-| `accessToken` | none |
 | `baseUrl` | `https://api.plotwork.dev` (`https://api-preview.plotwork.dev` for preview, or a self-hosted engine) |
 | `fetch` | the global `fetch` |
 | `timeoutMs` | `60000` |

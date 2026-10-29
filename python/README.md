@@ -25,7 +25,7 @@ The hosted Plotwork API from Python. Every `/v1` operation (validate, draw, rend
 |---|---|
 | What does it install? | Nothing else. |
 | Where do the types come from? | The API's OpenAPI document, kept in the SDK repository as [`spec/openapi.json`](https://github.com/plotwork-official/plotwork-sdk/blob/main/spec/openapi.json). Every request and answer is a `TypedDict`. |
-| How do I sign in? | An API key from the Plotwork portal (`api_key`), or an OAuth access token (`access_token`). |
+| How do I sign in? | An API key from the Plotwork portal (`api_key`), sent as `X-API-Key`. |
 | Does a mistake in a diagram raise? | No. It is part of the answer, with a line, a column and a hint. Only a failed request raises, as `PlotworkApiError` with a stable `error_code`. |
 | Does it retry? | A safe call is retried twice on 429 and 503, after the API's `Retry-After`. Publishing is never retried. |
 | Is there a TypeScript client? | Yes, [`@plotwork.official/sdk`](https://www.npmjs.com/package/@plotwork.official/sdk), with the same calls in camelCase. |
@@ -92,7 +92,6 @@ except PlotworkApiError as error:
 | Option | Default |
 |---|---|
 | `api_key` | none |
-| `access_token` | none |
 | `base_url` | `https://api.plotwork.dev` (`https://api-preview.plotwork.dev` for preview, or a self-hosted engine) |
 | `timeout` | `60` seconds |
 | `max_retries` | `2` |

@@ -31,12 +31,13 @@ describe('the Plotwork client', () => {
     expect(JSON.parse(String(calls[0]?.init.body))).toEqual({ source: 'flow "A"\nnode a service "A"\n' })
   })
 
-  it('puts a GET operation input in the query, and uses a bearer token and another base address', async () => {
+  it('puts a GET operation input in the query, and sends nothing to sign in with when there is no key', async () => {
     const { fetcher, calls } = fakeFetch(json({ results: [] }))
-    const plotwork = new Plotwork({ accessToken: 'tok', baseUrl: 'https://api-preview.plotwork.dev', fetch: fetcher })
+    const plotwork = new Plotwork({ baseUrl: 'https://api-preview.plotwork.dev', fetch: fetcher })
     await plotwork.icons.search({ q: 'token exchange', limit: 5 })
     expect(calls[0]?.url).toBe('https://api-preview.plotwork.dev/v1/icons?q=token+exchange&limit=5')
-    expect(calls[0]?.init.headers).toMatchObject({ Authorization: 'Bearer tok' })
+    expect(calls[0]?.init.headers).not.toHaveProperty('X-API-Key')
+    expect(calls[0]?.init.headers).not.toHaveProperty('Authorization')
     expect(calls[0]?.init.body).toBeNull()
   })
 

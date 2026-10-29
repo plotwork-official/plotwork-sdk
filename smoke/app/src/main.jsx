@@ -16,8 +16,11 @@ const record = (id, name) => (detail) => smoke.events.push({ id, name, ...detail
 
 function App() {
   return (
-    <main style={{ display: 'grid', gap: 16, padding: 24 }}>
+    <main style={{ display: 'grid', gap: 16, padding: 24, fontFamily: 'system-ui, sans-serif' }}>
+      <h1 style={{ margin: 0, fontSize: 20 }}>Plotwork SDK smoke test</h1>
+      <h2 style={{ margin: 0, fontSize: 15 }}>A .diagram file bundled by @plotwork.official/vite</h2>
       <PlotworkDiagram svg={checkout} label="Checkout, bundled" onLoad={record('bundled', 'load')} onError={record('bundled', 'error')} style={{ height: 360 }} />
+      {live === null ? null : <h2 style={{ margin: 0, fontSize: 15 }}>The stable link, live from the CDN</h2>}
       {live === null ? null : (
         <PlotworkDiagram
           src={live}

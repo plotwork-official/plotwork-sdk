@@ -13,17 +13,20 @@
  *   5. publishes version b, and waits for the live viewer to swap it in by itself (`plotwork-change`)
  *
  *   node smoke/run.mjs --env preview
- *   node smoke/run.mjs --env production --version 0.1.1
+ *   node smoke/run.mjs --env production --version 0.1.1 --shots smoke-shots
+ *
+ * With `--shots <folder>` it saves what Chromium showed, as evidence: the app with version a, then after version b swapped in, in
+ * light and in dark.
  *
  * Needs PLOTWORK_API_KEY: a personal key (an organisation key publishes into a private library, which has no public link). The
  * browser is Playwright's Chromium (`npx playwright-core install chromium` once); it drives the page and is not part of the app.
  */
 import { execFile as execFileCb } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { cp, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises'
+import { cp, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises'
 import { createServer } from 'node:http'
 import { tmpdir } from 'node:os'
-import { extname, join, normalize, sep } from 'node:path'
+import { extname, join, normalize, resolve, sep } from 'node:path'
 import { parseArgs, promisify } from 'node:util'
 import { chromium } from 'playwright-core'
 
@@ -44,6 +47,7 @@ const { values: args } = parseArgs({
     vite: { type: 'string' },
     sdk: { type: 'string' },
     keep: { type: 'boolean', default: false },
+    shots: { type: 'string' },
   },
 })
 const baseUrl = args['base-url'] ?? API[args.env]
@@ -147,6 +151,19 @@ async function checkStableLink(stableUrl, fingerprint) {
   if (again.status !== 304) throw new Error(`A check with the current ETag answered ${again.status}, not 304`)
 }
 
+/** Saves the page in light and dark as `<folder>/<env>-<name>-<scheme>.png`, when `--shots` asks for it. */
+async function shoot(page, name) {
+  if (args.shots === undefined) return
+  const folder = resolve(args.shots)
+  await mkdir(folder, { recursive: true })
+  for (const scheme of ['light', 'dark']) {
+    await page.emulateMedia({ colorScheme: scheme })
+    await page.waitForTimeout(300)
+    await page.screenshot({ path: join(folder, `${args.env}-${name}-${scheme}.png`), fullPage: true })
+  }
+  await page.emulateMedia({ colorScheme: 'light' })
+}
+
 function serve(folder) {
   const server = createServer(async (request, response) => {
     const pathname = new URL(request.url ?? '/', 'http://localhost').pathname
@@ -208,13 +225,15 @@ try {
     })
     const pictures = await page.locator('plotwork-diagram').evaluateAll((elements) => elements.map((element) => element.shadowRoot?.querySelector('img')?.naturalWidth ?? 0))
     if (pictures.length !== 2 || pictures.some((width) => width === 0)) throw new Error(`The viewers show no picture: ${JSON.stringify(pictures)}`)
+    await shoot(page, '1-version-a')
   })
 
   const b = await step('publish version b to the same stable link', () => publish(app, 'b'))
 
-  await step('the live viewer swaps in version b by itself', () =>
-    until('plotwork-change with version b', 240_000, async () => (await events()).some((event) => event.id === 'live' && event.name === 'change' && event.fingerprint === b.fingerprint)),
-  )
+  await step('the live viewer swaps in version b by itself', async () => {
+    await until('plotwork-change with version b', 240_000, async () => (await events()).some((event) => event.id === 'live' && event.name === 'change' && event.fingerprint === b.fingerprint))
+    await shoot(page, '2-version-b-live')
+  })
 
   if (problems.length > 0) await step('the page logs no errors', () => Promise.reject(new Error(problems.join('\n'))))
 } catch {
