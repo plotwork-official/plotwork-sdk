@@ -60,11 +60,12 @@ jobs:
         run: |
           pnpm build
           pnpm -r --filter "./packages/*" exec pnpm pack --pack-destination ../../dist-packs
-      - name: Install the example from its lockfile, then the packages from this change
+      # One install, with the packages from this change named on the command line: npm takes them in place of the versions in
+      # package.json, which may not be on npm yet (an example moves to a release before it is published), and keeps every other
+      # package at its locked version and integrity. --no-save leaves package.json and the lockfile as committed.
+      - name: Install the example from its lockfile, with the packages from this change
         working-directory: examples/${{ matrix.example }}
-        run: |
-          npm ci --ignore-scripts --no-audit --no-fund
-          npm install --no-save --ignore-scripts --no-audit --no-fund ../../dist-packs/plotwork.official-*.tgz
+        run: npm install --no-save --ignore-scripts --no-audit --no-fund ../../dist-packs/plotwork.official-*.tgz
       - name: Type check
         working-directory: examples/${{ matrix.example }}
         run: npm run typecheck

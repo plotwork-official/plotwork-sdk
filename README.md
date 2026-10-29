@@ -208,13 +208,13 @@ const plotwork = new Plotwork({ accessToken: token })
 <PlotworkLibrary token={token} onSelect={({ pictureUrl }) => show(pictureUrl)} />
 ```
 
-An API key stays on a server; a token from Sign in with Plotwork is the person's own and fine in a browser. The [API client](./packages/sdk/README.md#sign-in-with-plotwork) has the full server and browser examples.
+An API key stays on a server; a token from Sign in with Plotwork is the person's own and fine in a browser. The [API client](./packages/sdk/README.md#sign-in-with-plotwork) has the full server and browser examples, and the [Next.js](./examples/nextjs/README.md#sign-in-with-plotwork) and [React and Vite](./examples/react-vite/README.md#sign-in-with-plotwork) examples run them.
 
 The viewer renders as the bare element on a server and comes alive in the browser. Every attribute, method, event and style hook is in the [viewer reference](./packages/viewer/README.md).
 
 ## Examples
 
-Apps to clone, add your API key to, and run. Each installs the packages from npm as your project would, and CI builds each against every change.
+Apps to clone, add your API key or app to, and run. Each installs the packages from npm as your project would, and CI builds each against every change.
 
 <table>
   <tr>
@@ -226,7 +226,7 @@ Apps to clone, add your API key to, and run. Each installs the packages from npm
         </picture>
       </a><br>
       <b><a href="./examples/nextjs/README.md">Next.js</a></b><br>
-      A route handler checks and draws with the API client on the server; the key never reaches the browser.
+      Sign in with Plotwork as a confidential app, and a route handler that checks and draws with the API client; no key or token reaches the browser.
     </td>
     <td width="50%" valign="top">
       <a href="./examples/react-vite/README.md">
@@ -236,7 +236,7 @@ Apps to clone, add your API key to, and run. Each installs the packages from npm
         </picture>
       </a><br>
       <b><a href="./examples/react-vite/README.md">React and Vite</a></b><br>
-      A <code>.diagram</code> file bundled at build time with drill and trace events, and a playground through the dev server.
+      A <code>.diagram</code> file bundled at build time with drill and trace events, Sign in with Plotwork with no server, and a playground through the dev server.
     </td>
   </tr>
 </table>

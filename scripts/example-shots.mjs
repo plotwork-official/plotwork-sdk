@@ -7,13 +7,18 @@
  *
  *   pnpm shots:examples
  *   pnpm shots:examples --only nextjs
+ *   pnpm shots:examples --local        # the packages packed into dist-packs/ in place of npm's, as CI does
  *
  * PLOTWORK_API_KEY, PLOTWORK_BASE_URL and the stable link variables are passed to each app as they are. Without a key the
  * playground shows how to add one, and only what needs no key is drawn. It needs a Chromium that Playwright can launch
  * (`npx playwright-core install chromium` once). Not shipped; nothing imports it.
+ *
+ * `--local` installs the tarballs in `dist-packs/` (`pnpm build`, then `pnpm -r --filter "./packages/*" exec pnpm pack
+ * --pack-destination ../../dist-packs`) over the versions in each package.json, for a release not yet on npm. The sign-in sections
+ * are drawn signed out: signing in needs a person on Plotwork.
  */
 import { spawn, execFile as execFileCb } from 'node:child_process'
-import { cp, mkdir, mkdtemp, rm } from 'node:fs/promises'
+import { cp, mkdir, mkdtemp, readdir, rm } from 'node:fs/promises'
 import { createServer } from 'node:net'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -31,10 +36,18 @@ const EXAMPLES = {
   'react-vite': { serve: (port) => ['npx', ['vite', 'preview', '--port', String(port), '--strictPort', '--host', '127.0.0.1']] },
 }
 
-const { values: args } = parseArgs({ options: { only: { type: 'string' } } })
+const { values: args } = parseArgs({ options: { only: { type: 'string' }, local: { type: 'boolean', default: false } } })
 const names = args.only === undefined ? Object.keys(EXAMPLES) : [args.only]
 for (const name of names) if (!(name in EXAMPLES)) throw new Error(`No example ${name}; use ${Object.keys(EXAMPLES).join(' or ')}`)
 const hasKey = Boolean(process.env.PLOTWORK_API_KEY)
+
+/** The packed packages in dist-packs/, for --local. */
+async function localPacks() {
+  const folder = join(ROOT, 'dist-packs')
+  const packs = (await readdir(folder).catch(() => [])).filter((file) => /^plotwork\.official-.*\.tgz$/.test(file)).map((file) => join(folder, file))
+  if (packs.length === 0) throw new Error('No packages in dist-packs/: run pnpm build, then pack them (see the top of this file)')
+  return packs
+}
 
 function say(line) {
   process.stdout.write(`${line}\n`)
@@ -114,8 +127,11 @@ try {
     let server
     try {
       await cp(join(ROOT, 'examples', name), folder, { recursive: true, filter: (path) => !SKIP.has(path.split(/[\\/]/).at(-1)) })
-      say(`${name}: install from npm`)
-      await execFile('npm', ['install', '--ignore-scripts', '--no-audit', '--no-fund', '--loglevel=error'], { cwd: folder, maxBuffer: 32 * 1024 * 1024 })
+      say(`${name}: install from npm${args.local ? ', with the packages in dist-packs' : ''}`)
+      await execFile('npm', ['install', ...(args.local ? ['--no-save', ...(await localPacks())] : []), '--ignore-scripts', '--no-audit', '--no-fund', '--loglevel=error'], {
+        cwd: folder,
+        maxBuffer: 32 * 1024 * 1024,
+      })
       say(`${name}: build`)
       await execFile('npm', ['run', 'build'], { cwd: folder, env: { ...process.env, NEXT_TELEMETRY_DISABLED: '1' }, maxBuffer: 32 * 1024 * 1024 })
       const port = await freePort()
