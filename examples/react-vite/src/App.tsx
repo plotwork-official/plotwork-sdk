@@ -4,10 +4,14 @@ import { useState } from 'react'
 import checkout, { fingerprint } from './diagrams/checkout.diagram'
 import checkoutSource from './diagrams/checkout.diagram?raw'
 import { Playground } from './Playground'
+import { SignIn } from './SignIn'
 
 const stableLink = import.meta.env.VITE_PLOTWORK_STABLE_LINK
 
-/** The page: a diagram bundled at build time, a playground that draws through the API, and a stable link followed live. */
+/**
+ * The page: a diagram bundled at build time, Sign in with Plotwork and the person's library, a playground that draws through the API,
+ * and a stable link followed live.
+ */
 export function App() {
   const [said, setSaid] = useState('Hover a box to trace its lines. Press Web tier to drill into its part.')
   const [live, setLive] = useState('')
@@ -38,6 +42,15 @@ export function App() {
         <p className="status" role="status">
           {said}
         </p>
+      </section>
+
+      <section aria-labelledby="sign-in">
+        <h2 id="sign-in">Sign in with Plotwork</h2>
+        <p>
+          A person approves this app on Plotwork once, and this page shows their own diagrams, private ones included, with their token. No
+          server and no secret: the browser trades the code itself, with PKCE.
+        </p>
+        <SignIn />
       </section>
 
       <section aria-labelledby="playground">

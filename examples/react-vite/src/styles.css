@@ -208,3 +208,83 @@ button[type='submit']:disabled {
   margin: 8px 0 0;
   font-size: 14px;
 }
+
+.signin {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 18px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.signin:hover {
+  border-color: var(--accent);
+}
+
+.signin:focus-visible,
+button.quiet:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.signin img {
+  display: block;
+}
+
+.library {
+  display: grid;
+  gap: 16px;
+}
+
+.who {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+
+.who p {
+  margin: 0;
+  color: var(--ink);
+}
+
+button.quiet {
+  padding: 6px 14px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--ink);
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.picker {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 760px) {
+  .picker {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.library-list {
+  display: block;
+  max-height: 420px;
+}
+
+.notice + .signin,
+.notice + .library {
+  margin-top: 12px;
+}
