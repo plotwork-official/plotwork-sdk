@@ -1,0 +1,55 @@
+[build-system]
+requires = ["hatchling==1.33.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "plotwork"
+version = "0.1.0"
+description = "The Plotwork API from Python: validate, draw, render, import and publish diagrams, on the standard library alone."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Plotwork" }]
+keywords = ["plotwork", "diagrams", "diagrams-as-code", "architecture", "svg", "api-client"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Documentation",
+  "Topic :: Multimedia :: Graphics",
+  "Topic :: Software Development :: Documentation",
+  "Typing :: Typed",
+]
+# No runtime dependencies: scripts/check-no-runtime-dependencies.mjs fails if this list gains a name.
+dependencies = []
+
+[project.urls]
+Homepage = "https://plotwork.dev"
+Documentation = "https://docs.plotwork.dev/sdks"
+Source = "https://github.com/plotwork-official/plotwork-sdk"
+Issues = "https://github.com/plotwork-official/plotwork-sdk/issues"
+
+[dependency-groups]
+# What CI installs: the tests, the build, and a strict type check of the generated types.
+dev = ["pytest==9.2.0", "build==1.6.1", "mypy==2.4.1"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/plotwork"]
+exclude = ["src/plotwork/README.md"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/plotwork", "tests", "README.md", "LICENSE", "pyproject.toml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-ra"
+filterwarnings = ["error"]

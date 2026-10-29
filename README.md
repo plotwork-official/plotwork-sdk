@@ -31,6 +31,7 @@
   <a href="./packages/viewer/README.md">Viewer reference</a> &nbsp;·&nbsp;
   <a href="./packages/vite/README.md">Vite plugin</a> &nbsp;·&nbsp;
   <a href="./packages/sdk/README.md">API client</a> &nbsp;·&nbsp;
+  <a href="./python/README.md">Python</a> &nbsp;·&nbsp;
   <a href="./spec/picture.md">Picture contract</a> &nbsp;·&nbsp;
   <a href="./examples/vanilla/index.html">Example</a>
 </p>
@@ -180,6 +181,15 @@ const plotwork = new Plotwork({ apiKey: process.env.PLOTWORK_API_KEY })
 const checked = await plotwork.diagrams.validate({ source })
 ```
 
+```python
+import os
+
+from plotwork import Plotwork
+
+plotwork = Plotwork(api_key=os.environ["PLOTWORK_API_KEY"])
+checked = plotwork.diagrams.validate(source=source)
+```
+
 The viewer renders as the bare element on a server and comes alive in the browser. Every attribute, method, event and style hook is in the [viewer reference](./packages/viewer/README.md).
 
 ## Where the pictures come from
@@ -210,13 +220,14 @@ The viewer only checks while its page is in view, never more often than every 15
 | [`@plotwork.official/viewer`](./packages/viewer/README.md) | <img alt="npm" src="https://img.shields.io/npm/v/%40plotwork.official%2Fviewer?label=&color=0f766e"> | `<plotwork-diagram>`, `<PlotworkDiagram>` for React, and the core with no element (`/core`). |
 | [`@plotwork.official/vite`](./packages/vite/README.md) | <img alt="npm" src="https://img.shields.io/npm/v/%40plotwork.official%2Fvite?label=&color=0f766e"> | `import checkout from './checkout.diagram'`: drawn at build time by the command line and redrawn on save, so no engine reaches the browser. |
 | [`@plotwork.official/sdk`](./packages/sdk/README.md) | <img alt="npm" src="https://img.shields.io/npm/v/%40plotwork.official%2Fsdk?label=&color=0f766e"> | Every `/v1` operation of the Plotwork API, typed from its OpenAPI document, on `fetch` alone. |
-| [`plotwork`](https://pypi.org/org/plotwork/) on PyPI | planned | The API client for Python, standard library only. |
+| [`plotwork`](./python/README.md) on PyPI | <img alt="PyPI" src="https://img.shields.io/pypi/v/plotwork?label=&color=0f766e"> | Every `/v1` operation of the Plotwork API from Python, typed from the same OpenAPI document, on the standard library alone. |
 
 ## Supply chain
 
 | Measure | Where |
 |---|---|
-| No runtime dependencies in any published package; CI fails if one appears | [`scripts/check-no-runtime-dependencies.mjs`](./scripts/check-no-runtime-dependencies.mjs) |
+| No runtime dependencies in any published package, on npm or PyPI; CI fails if one appears | [`scripts/check-no-runtime-dependencies.mjs`](./scripts/check-no-runtime-dependencies.mjs) |
+| The Python package published only from CI by PyPI trusted publishing, with PEP 740 attestations | [`.github/workflows/publish-python.yml`](./.github/workflows/README.md) |
 | Published only from CI by npm trusted publishing (OIDC, no token), with a signed provenance statement | [`.github/workflows/publish.yml`](./.github/workflows/README.md) |
 | Exact versions, frozen lockfile, no install scripts | [`.npmrc`](./.npmrc), CI |
 | New dependency versions wait a week | [`pnpm-workspace.yaml`](./pnpm-workspace.yaml), [`renovate.json`](./renovate.json) |
@@ -254,6 +265,7 @@ pnpm check
 | [Viewer reference](./packages/viewer/README.md) | Attributes, events, theming, content security policy |
 | [Vite plugin](./packages/vite/README.md) | Importing `.diagram` files, options, hot reload |
 | [API client](./packages/sdk/README.md) | Every `/v1` call, errors, retries |
+| [Python client](./python/README.md) | The same calls from Python |
 | [Picture contract](./spec/picture.md) | What every SDK reads from a picture |
 | [Plotwork docs](https://docs.plotwork.dev) | Writing diagrams, the command line, the MCP server, organisations |
 
