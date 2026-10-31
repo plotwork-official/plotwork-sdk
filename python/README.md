@@ -68,7 +68,7 @@ A method takes the request's fields as keyword arguments, named as the API names
 | `patterns` | `find`, `get`, `draw`, `check` |
 | `icons` | `search`, `map` |
 | `vocabulary` | The language's statements and limits, for a kind or a topic |
-| `library` | `list` (a page of the diagrams the key or token can see), `picture` (one picture's SVG and ETag), `picture_url` |
+| `library` | `list` (a page of the diagrams the key or token can see, `q` to search names and folders), `picture` (one picture's SVG and ETag), `picture_url`, `png` (the picture as a PNG, `width` and `scheme`, for places that take no SVG), `png_url` |
 | `me` | Who the key or token acts as |
 
 ## Sign in with Plotwork

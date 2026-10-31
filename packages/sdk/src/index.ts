@@ -70,5 +70,5 @@ export class Plotwork {
 
 export { createRequest, createSend, PlotworkApiError, retryDelay, urlOf } from './request.js'
 export type { AccessTokenSource, CallOptions, Request, RequestSpec, Transport } from './request.js'
-export type { LibraryPicture, LibraryPictureOptions, LibraryPictures } from './library.js'
+export type { LibraryPicture, LibraryPictureOptions, LibraryPictures, LibraryPng, LibraryPngOptions } from './library.js'
 export * from './generated.js'

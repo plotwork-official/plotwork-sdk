@@ -1850,7 +1850,7 @@ export function operations(request: Request) {
       request<ImportSourceResponse>({ method: 'POST', path: '/v1/import', idempotent: true, body: input }, options),
     library: {
       /** List the diagrams a key or an app's token can see. `GET /v1/library` */
-      list: (input?: { limit?: number; cursor?: string; folder?: string }, options?: CallOptions): Promise<LibraryPage> =>
+      list: (input?: { limit?: number; cursor?: string; folder?: string; q?: string }, options?: CallOptions): Promise<LibraryPage> =>
         request<LibraryPage>({ method: 'GET', path: '/v1/library', idempotent: true, query: input }, options),
     },
     markdown: {

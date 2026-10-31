@@ -1,13 +1,14 @@
 """``plotwork.library``: the generated ``list``, and the pictures, written by hand.
 
-``GET /v1/library/{id}.svg`` answers an SVG with a strong ETag, not JSON, so it is text and a tag rather than a typed value.
+``GET /v1/library/{id}.svg`` answers an SVG and ``GET /v1/library/{id}.png`` a PNG, each with a strong ETag, not JSON, so each is
+the picture and a tag rather than a typed value.
 """
 
 from __future__ import annotations
 
 import urllib.parse
 from dataclasses import dataclass
-from typing import Optional
+from typing import Literal, Optional
 
 from ._generated import LibraryOperations
 
@@ -22,12 +23,26 @@ class LibraryPicture:
     etag: Optional[str]
 
 
+@dataclass(frozen=True)
+class LibraryPng:
+    """One picture of the library painted as a PNG."""
+
+    #: The PNG bytes.
+    png: bytes
+    #: The strong tag to send back as ``etag`` next time, or ``None`` when the API sent none.
+    etag: Optional[str]
+
+
+def _png_path_of(diagram_id: str) -> str:
+    return f"/v1/library/{urllib.parse.quote(diagram_id, safe='')}.png"
+
+
 def _path_of(diagram_id: str) -> str:
     return f"/v1/library/{urllib.parse.quote(diagram_id, safe='')}.svg"
 
 
 class Library(LibraryOperations):
-    """The ``library`` operations: ``list``, ``picture`` and ``picture_url``."""
+    """The ``library`` operations: ``list``, ``picture``, ``picture_url``, ``png`` and ``png_url``."""
 
     def picture_url(self, diagram_id: str) -> str:
         """The address of a picture of the library. It needs a key or a token with ``library:read``."""
@@ -37,3 +52,20 @@ class Library(LibraryOperations):
         """The picture's SVG and tag; ``None`` when ``etag`` is given and the picture has not changed. ``GET /v1/library/{id}.svg``"""
         answer = self._transport.request_text(_path_of(diagram_id), accept="image/svg+xml", etag=etag)
         return None if answer is None else LibraryPicture(svg=answer[0], etag=answer[1])
+
+    def png_url(self, diagram_id: str, *, width: Optional[int] = None, scheme: Optional[Literal["light", "dark"]] = None) -> str:
+        """The address of the picture as a PNG. It needs a key or a token with ``library:read``."""
+        return self._transport.url_of(_png_path_of(diagram_id), {"width": width, "scheme": scheme})
+
+    def png(
+        self,
+        diagram_id: str,
+        *,
+        width: Optional[int] = None,
+        scheme: Optional[Literal["light", "dark"]] = None,
+        etag: Optional[str] = None,
+    ) -> Optional[LibraryPng]:
+        """The picture painted as a PNG, ``width`` pixels wide (1600 when left out), for places that take no SVG; ``None`` when
+        ``etag`` is given and it has not changed. ``GET /v1/library/{id}.png``"""
+        answer = self._transport.request_bytes(_png_path_of(diagram_id), accept="image/png", etag=etag, query={"width": width, "scheme": scheme})
+        return None if answer is None else LibraryPng(png=answer[0], etag=answer[1])

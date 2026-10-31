@@ -213,3 +213,22 @@ def test_the_library_lists_and_reads_a_picture_with_its_tag(api: FakeApi) -> Non
     assert api.seen[1].headers["authorization"] == "Bearer pwa_1"
     assert plotwork.library.picture(picture_id, etag='"abc"') is None
     assert api.seen[2].headers["if-none-match"] == '"abc"'
+
+
+def test_the_library_reads_a_png_at_a_width_and_scheme_and_searches(api: FakeApi) -> None:
+    png = bytes([0x89, 0x50, 0x4E, 0x47])
+    api.answer(
+        Answer(body={"items": [], "nextCursor": None}),
+        Answer(raw=png, headers={"Content-Type": "image/png", "ETag": '"png"'}),
+        Answer(304, headers={"ETag": '"png"'}),
+    )
+    plotwork = Plotwork(base_url=api.url, access_token="pwa_1")
+    plotwork.library.list(q="checkout")
+    assert api.seen[0].path == "/v1/library?q=checkout"
+    picture_id = "6f1c2d3e-0000-4000-8000-000000000001"
+    assert plotwork.library.png_url(picture_id, width=320) == f"{api.url}/v1/library/{picture_id}.png?width=320"
+    painted = plotwork.library.png(picture_id, width=1600, scheme="dark")
+    assert painted is not None and (painted.png, painted.etag) == (png, '"png"')
+    assert api.seen[1].path == f"/v1/library/{picture_id}.png?width=1600&scheme=dark"
+    assert api.seen[1].headers["accept"] == "image/png"
+    assert plotwork.library.png(picture_id, etag='"png"') is None

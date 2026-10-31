@@ -110,6 +110,24 @@ describe('the Plotwork client', () => {
     expect(calls[2]?.init.headers).toMatchObject({ 'If-None-Match': '"abc"' })
   })
 
+  it('reads a picture as a PNG at a width and scheme, with its tag, and searches the library with q', async () => {
+    const bytes = new Uint8Array([0x89, 0x50, 0x4e, 0x47])
+    const { fetcher, calls } = fakeFetch(
+      json({ items: [], nextCursor: null }),
+      new Response(bytes, { status: 200, headers: { 'content-type': 'image/png', etag: '"png"' } }),
+      new Response(null, { status: 304, headers: { etag: '"png"' } }),
+    )
+    const plotwork = new Plotwork({ accessToken: 'pwa_1', baseUrl: 'https://api-preview.plotwork.dev', fetch: fetcher })
+    await plotwork.library.list({ q: 'checkout' })
+    expect(calls[0]?.url).toBe('https://api-preview.plotwork.dev/v1/library?q=checkout')
+    const id = '6f1c2d3e-0000-4000-8000-000000000001'
+    expect(plotwork.library.pngUrl(id, { width: 320 })).toBe(`https://api-preview.plotwork.dev/v1/library/${id}.png?width=320`)
+    expect(await plotwork.library.png(id, { width: 1600, scheme: 'dark' })).toEqual({ png: bytes, etag: '"png"' })
+    expect(calls[1]?.url).toBe(`https://api-preview.plotwork.dev/v1/library/${id}.png?width=1600&scheme=dark`)
+    expect(calls[1]?.init.headers).toMatchObject({ Accept: 'image/png', Authorization: 'Bearer pwa_1' })
+    expect(await plotwork.library.png(id, { etag: '"png"' })).toBeNull()
+  })
+
   it('covers every public operation of the spec', () => {
     expect(OPERATION_PATHS).toContain('POST /v1/diagrams/publish')
     expect(OPERATION_PATHS).toContain('GET /v1/icons')

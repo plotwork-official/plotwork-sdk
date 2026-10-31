@@ -1359,7 +1359,7 @@
           "Hosting"
         ],
         "summary": "List the diagrams a key or an app's token can see.",
-        "description": "A page of diagrams, newest first: a person's own hosted diagrams, or an organisation's library under its folder rules and approval holds, as the person would see it. No diagram source is answered. An app's token needs library:read. Open to every plan.",
+        "description": "A page of diagrams, newest first: a person's own hosted diagrams, or an organisation's library under its folder rules and approval holds, as the person would see it. q keeps to names and folders that hold the words. No diagram source is answered. An app's token needs library:read. Open to every plan.",
         "security": [
           {
             "ApiKey": []
@@ -1403,6 +1403,18 @@
             "required": false,
             "description": "Keep to this folder and everything inside it, such as Payments/Checkout.",
             "name": "folder",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "description": "Keep to diagrams whose name or folder holds these words, ignoring case."
+            },
+            "required": false,
+            "description": "Keep to diagrams whose name or folder holds these words, ignoring case.",
+            "name": "q",
             "in": "query"
           }
         ],
@@ -1459,6 +1471,148 @@
           },
           "429": {
             "description": "Too many requests, or the daily limit is used up.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/library/{id}.png": {
+      "get": {
+        "tags": [
+          "Hosting"
+        ],
+        "summary": "Read one picture of the library as a PNG.",
+        "description": "The picture {id}.svg answers, painted as a PNG width pixels wide (1600 when left out) on the paper of its scheme, for places that take no SVG. Painted for each call and never kept, with a strong ETag; If-None-Match answers 304. An app's token needs library:read.",
+        "security": [
+          {
+            "ApiKey": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 64,
+              "maximum": 4000,
+              "default": 1600,
+              "description": "The width in pixels, 64 to 4000. 1600 when left out. Lowered to keep the picture under 25 megapixels."
+            },
+            "required": false,
+            "description": "The width in pixels, 64 to 4000. 1600 when left out. Lowered to keep the picture under 25 megapixels.",
+            "name": "width",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "light",
+                "dark"
+              ],
+              "default": "light",
+              "description": "For a picture that follows the reader's color scheme, the one to paint. A light or dark picture is painted as it was drawn. light when left out."
+            },
+            "required": false,
+            "description": "For a picture that follows the reader's color scheme, the one to paint. A light or dark picture is painted as it was drawn. light when left out.",
+            "name": "scheme",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The PNG.",
+            "content": {
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "The picture has not changed."
+          },
+          "400": {
+            "description": "The width or the scheme is not valid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No key, or the key or token is not valid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token's grant does not hold library:read (oauth.insufficient_scope).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such diagram the caller can see.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The picture is too big to paint (raster.too_large).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests, or the daily limit is used up.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Painting pictures is not available on this server (raster.unavailable).",
             "content": {
               "application/json": {
                 "schema": {

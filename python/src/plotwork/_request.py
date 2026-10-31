@@ -206,13 +206,20 @@ class Transport:
 
     def request_text(self, path: str, *, accept: str, etag: Optional[str] = None) -> Optional[Tuple[str, Optional[str]]]:
         """Sends a GET for text and returns it with its ``ETag``; ``None`` when ``etag`` is given and the server answers 304."""
+        answer = self.request_bytes(path, accept=accept, etag=etag)
+        return None if answer is None else (answer[0].decode("utf-8"), answer[1])
+
+    def request_bytes(
+        self, path: str, *, accept: str, etag: Optional[str] = None, query: Optional[Mapping[str, Any]] = None
+    ) -> Optional[Tuple[bytes, Optional[str]]]:
+        """Sends a GET and returns the body with its ``ETag``; ``None`` when ``etag`` is given and the server answers 304."""
         headers = {"Accept": accept, "User-Agent": f"plotwork-python/{__version__}"}
         if etag is not None:
             headers["If-None-Match"] = etag
-        status, raw, answer_headers = self._send("GET", self.url_of(path), idempotent=True, headers=headers, data=None)
+        status, raw, answer_headers = self._send("GET", self.url_of(path, query), idempotent=True, headers=headers, data=None)
         if status == 304:
             if etag is None:
                 raise PlotworkApiError(304, "http.304", "The Plotwork API answered 304 to a call that sent no tag")
             return None
         tag = None if answer_headers is None else answer_headers.get("etag")
-        return raw.decode("utf-8"), None if tag is None else str(tag)
+        return raw, None if tag is None else str(tag)

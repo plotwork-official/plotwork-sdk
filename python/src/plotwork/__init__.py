@@ -17,7 +17,7 @@ from __future__ import annotations
 from typing import Any, Callable, Dict, Optional
 
 from ._generated import OPERATION_PATHS, Operations
-from ._library import Library, LibraryPicture
+from ._library import Library, LibraryPicture, LibraryPng
 from ._request import AccessToken, Opener, PlotworkApiError, Transport, retry_delay
 from ._version import __version__
 
@@ -27,6 +27,7 @@ __all__ = [
     "AccessToken",
     "Library",
     "LibraryPicture",
+    "LibraryPng",
     "Plotwork",
     "PlotworkApiError",
     "Transport",

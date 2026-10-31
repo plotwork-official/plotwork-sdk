@@ -172,6 +172,8 @@ export async function finishSignIn(): Promise<Plotwork> {
 
 Every refusal is a `PlotworkOAuthError` with OAuth's `error` (`invalid_grant`, `invalid_client`, `access_denied`), its `description`, and the HTTP `status`. Every helper takes `baseUrl` (`https://api-preview.plotwork.dev` for preview) and `fetch`.
 
+For a place that takes no SVG, such as a social network or a slide, `plotwork.library.png(id, { width: 1600, scheme: 'light' })` answers the picture as PNG bytes; a small width makes a thumbnail. `plotwork.library.list({ q: 'checkout' })` searches names and folders.
+
 To show a private picture of the person's library, give the viewer the same token: `<PlotworkDiagram src={plotwork.library.pictureUrl(id)} token={token} />` ([viewer](https://www.npmjs.com/package/@plotwork.official/viewer)).
 
 ## Errors

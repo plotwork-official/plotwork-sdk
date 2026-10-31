@@ -2210,9 +2210,9 @@ class LibraryOperations:
     def __init__(self, transport: Transport) -> None:
         self._transport = transport
 
-    def list(self, *, limit: Optional[int] = None, cursor: Optional[str] = None, folder: Optional[str] = None) -> LibraryPage:
+    def list(self, *, limit: Optional[int] = None, cursor: Optional[str] = None, folder: Optional[str] = None, q: Optional[str] = None) -> LibraryPage:
         """List the diagrams a key or an app's token can see. ``GET /v1/library``"""
-        return cast("LibraryPage", self._transport.request("GET", "/v1/library", idempotent=True, query={"limit": limit, "cursor": cursor, "folder": folder}))
+        return cast("LibraryPage", self._transport.request("GET", "/v1/library", idempotent=True, query={"limit": limit, "cursor": cursor, "folder": folder, "q": q}))
 
 
 class MarkdownOperations:

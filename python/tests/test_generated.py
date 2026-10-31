@@ -85,10 +85,12 @@ def test_lists_exactly_the_operations_placed_above() -> None:
 @pytest.mark.skipif(not SPEC.exists(), reason="spec/openapi.json is not beside this package (an unpacked sdist)")
 def test_every_path_in_the_spec_has_a_method() -> None:
     spec = json.loads(SPEC.read_text(encoding="utf-8"))
-    # The picture route answers SVG text, not JSON: it is written by hand as ``library.picture``.
-    operations = sorted(f"{method.upper()} {path}" for path, item in spec["paths"].items() for method in item if not path.endswith(".svg"))
+    # The picture routes answer SVG text and PNG bytes, not JSON: they are written by hand as ``library.picture`` and ``library.png``.
+    pictures = (".svg", ".png")
+    operations = sorted(f"{method.upper()} {path}" for path, item in spec["paths"].items() for method in item if not path.endswith(pictures))
     assert operations == sorted(OPERATION_PATHS)
     assert "/v1/library/{id}.svg" in spec["paths"]
+    assert "/v1/library/{id}.png" in spec["paths"]
     client = Plotwork()
     for operation in operations:
         assert callable(method_for(client, EXPECTED[operation])), operation
