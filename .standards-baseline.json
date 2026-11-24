@@ -1,0 +1,38 @@
+{
+  "about": "Findings the standards gates already reported when this baseline was taken. CI fails only on a finding not listed here. Shrink it with `node .standards/claude/enforcement/ci.ts --baseline prune` as findings are fixed; never add to it.",
+  "taken": "2026-11-24",
+  "standards": "2.12.0",
+  "gates": {
+    "anti-slop": {
+      "python/smoke.py: print() left in non-test code — print(\"Set PLOTWORK_BASE_URL and PLOTWORK_API_KEY\")": 1,
+      "python/smoke.py: print() left in non-test code — print(f\" no public link (private: {answer.get('private')}); the picture is not fetched\")": 1,
+      "python/smoke.py: print() left in non-test code — print(f\" {url}\")": 1,
+      "python/smoke.py: print() left in non-test code — print(f\"FAIL {name}: PlotworkApiError status={error.status} error_code={error.error_code} message={error.message} request_id={error.request_id}\")": 1,
+      "python/smoke.py: print() left in non-test code — print(f\"FAIL {name}: {failure}\")": 1,
+      "python/smoke.py: print() left in non-test code — print(f\"ok {name}\")": 1,
+      "python/smoke.py: print() left in non-test code — print(f\"plotwork was imported from the source tree ({plotwork.__file__}); install the package and run again\")": 1,
+      "python/smoke.py: print() left in non-test code — print(f\"plotwork {plotwork.__version__} from {Path(plotwork.__file__).parent}, against {base_url}\")": 1
+    },
+    "forbidden": {
+      "examples/nextjs/app/globals.css: css-coloured-side-stripe - A coloured stripe down one edge of a card, row or field (a thick one-sided border or an inset shadow in a status, brand or accent colour) is a stock tell of generated UI, and colour alone carries the state, which a colour-blind reader misses.": 1,
+      "examples/react-vite/src/styles.css: css-coloured-side-stripe - A coloured stripe down one edge of a card, row or field (a thick one-sided border or an inset shadow in a status, brand or accent colour) is a stock tell of generated UI, and colour alone carries the state, which a colour-blind reader misses.": 1
+    },
+    "semgrep": {
+      "fetch-without-timeout docs/film/film.js: const [v1, v2] = await Promise.all(['./checkout.svg', './checkout-v2.svg'].map((path) => fetch(path).then((answer) => answer.text())))": 1,
+      "fetch-without-timeout examples/nextjs/app/library.tsx: fetch('/api/library', { credentials: 'same-origin' })": 1,
+      "fetch-without-timeout examples/nextjs/app/library.tsx: return fetch(input, { ...init, credentials: 'same-origin' })": 1,
+      "fetch-without-timeout examples/nextjs/app/playground.tsx: const response = await fetch('/api/draw', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ source: text }) })": 1,
+      "fetch-without-timeout packages/viewer/src/core/picture-loader.ts: const fetcher: Fetcher = options.fetcher ?? ((input, init) => fetch(input, init))": 1,
+      "fetch-without-timeout packages/viewer/src/library/pages.ts: const fetcher: Fetcher = query.fetch ?? ((input, init) => fetch(input, init))": 1,
+      "fetch-without-timeout scripts/example-shots.mjs: if ((await fetch(origin)).ok) return": 1,
+      "fetch-without-timeout smoke/run.mjs: const again = await fetch(stableUrl, { headers: { 'if-none-match': etag }, cache: 'no-store' })": 1,
+      "fetch-without-timeout smoke/run.mjs: const answer = await fetch(`${stableUrl}?smoke=${Date.now()}`, { cache: 'no-store' })": 1,
+      "fetch-without-timeout smoke/run.mjs: const picture = await fetch(answer.url, { cache: 'no-store' })": 1
+    },
+    "file-names": {
+      "examples/react-vite/src/App.tsx": 1,
+      "examples/react-vite/src/Playground.tsx": 1,
+      "examples/react-vite/src/SignIn.tsx": 1
+    }
+  }
+}
