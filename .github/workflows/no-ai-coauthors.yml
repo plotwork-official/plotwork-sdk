@@ -1,0 +1,40 @@
+name: No AI co-authors
+
+# The organisation does not allow AI agents to appear as contributors. Fails a push or pull request whose commits credit
+# an AI tool: a Co-Authored-By line naming one, a Claude-Session line, or a "Generated with" line.
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Refuse commits that credit an AI tool
+        env:
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if [ -n "$PR_BASE" ]; then range="$PR_BASE..$PR_HEAD"
+          elif [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then range="-n 50 $AFTER"
+          else range="$BEFORE..$AFTER"; fi
+          pattern='^(co-authored-by:.*(claude|anthropic|copilot|chatgpt|openai|gemini|cursor|codex|devin|aider)|claude-session:|.*generated with .*(claude|ai))'
+          found="$(git log --format='%h %s%n%b' $range | grep -iE "$pattern" || true)"
+          if [ -n "$found" ]; then
+            echo "::error::These commits credit an AI tool, which this organisation does not allow. Remove the lines and push again."
+            echo "$found"
+            exit 1
+          fi
+          echo "No commit in $range credits an AI tool."
